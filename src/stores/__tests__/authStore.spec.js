@@ -49,7 +49,7 @@ describe('authStore', () => {
 
     expect(store.isAuthenticated).toBe(true)
     expect(store.token).toContain('demo-sanctum-token')
-    expect(store.user.email).toBe('demo@example.com')
+    expect(store.user.email).toBe('test@example.com')
   })
 
   it('logs out and clears localStorage', async () => {

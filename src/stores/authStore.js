@@ -48,23 +48,23 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
     error.value = null
     try {
-      // Try API login with demo credentials
+      // Try API login with credentials test@example.com and password
       const data = await authService.login({
-        email: 'demo@example.com',
-        password: 'password123',
+        email: 'test@example.com',
+        password: 'password',
       })
       const responseToken = data.token || data.access_token || (data.data && data.data.token)
-      const responseUser = data.user || (data.data && data.data.user) || { name: 'Demo Visitor', email: 'demo@example.com' }
+      const responseUser = data.user || (data.data && data.data.user) || { id: 1, name: 'Test User', email: 'test@example.com' }
       setAuth(responseToken, responseUser)
       return data
     } catch (err) {
-      // Fallback for demo portfolio login if backend API is not running locally
+      // Fallback for demo login if API is unreachable
       const demoToken = 'demo-sanctum-token-123456789'
       const demoUser = {
         id: 1,
-        name: 'Demo Visitor',
-        email: 'demo@example.com',
-        role: 'recruiter_demo',
+        name: 'Test User',
+        email: 'test@example.com',
+        role: 'user',
       }
       setAuth(demoToken, demoUser)
       return { token: demoToken, user: demoUser }

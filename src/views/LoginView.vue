@@ -45,9 +45,11 @@ async function handleLogin() {
 }
 
 async function handleDemoLogin() {
+  email.value = 'test@example.com'
+  password.value = 'password'
   try {
     await authStore.demoLogin()
-    toastStore.showToast('Selamat datang di Mode Demo Portfolio!', 'success')
+    toastStore.showToast('Berhasil masuk sebagai akun Demo Test!', 'success')
     router.push('/dashboard')
   } catch (err) {
     // Handled
