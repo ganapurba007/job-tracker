@@ -49,6 +49,14 @@ describe('jobStore', () => {
     expect(firstDateOldest).toBeLessThanOrEqual(lastDateOldest)
   })
 
+  it('calculates total count, response rate, and breakdown charts analytics', () => {
+    const store = useJobStore()
+    expect(store.totalApplicationsCount).toBe(4)
+    expect(store.responseRatePercent).toBe(50) // 2 responded out of 4 = 50%
+    expect(store.statusBreakdownData.labels.length).toBeGreaterThan(0)
+    expect(store.platformBreakdownData.labels.length).toBeGreaterThan(0)
+  })
+
   it('adds a new application', async () => {
     const store = useJobStore()
     const initialCount = store.applications.length

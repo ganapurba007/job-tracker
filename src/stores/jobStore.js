@@ -106,6 +106,49 @@ export const useJobStore = defineStore('job', () => {
     return result
   })
 
+  // Analytics KPI Getters
+  const totalApplicationsCount = computed(() => applications.value.length)
+
+  const responseRatePercent = computed(() => {
+    if (!applications.value.length) return 0
+    // Responded means status is not initial 'Applied' (1) and not 'Wishlist' (5)
+    const responded = applications.value.filter(a => Number(a.status_id) !== 1 && Number(a.status_id) !== 5)
+    return Math.round((responded.length / applications.value.length) * 100)
+  })
+
+  const statusBreakdownData = computed(() => {
+    const refStore = useReferenceStore()
+    const counts = {}
+    refStore.statuses.forEach(s => { counts[s.id] = 0 })
+
+    applications.value.forEach(app => {
+      const sId = app.status_id
+      counts[sId] = (counts[sId] || 0) + 1
+    })
+
+    const labels = refStore.statuses.map(s => s.name)
+    const data = refStore.statuses.map(s => counts[s.id] || 0)
+    const backgroundColor = refStore.statuses.map(s => s.color || '#325E6A')
+
+    return { labels, data, backgroundColor }
+  })
+
+  const platformBreakdownData = computed(() => {
+    const refStore = useReferenceStore()
+    const counts = {}
+    refStore.platforms.forEach(p => { counts[p.id] = 0 })
+
+    applications.value.forEach(app => {
+      const pId = app.platform_id
+      counts[pId] = (counts[pId] || 0) + 1
+    })
+
+    const labels = refStore.platforms.map(p => p.name)
+    const data = refStore.platforms.map(p => counts[p.id] || 0)
+
+    return { labels, data }
+  })
+
   async function fetchApplications() {
     loading.value = true
     error.value = null
@@ -269,6 +312,10 @@ export const useJobStore = defineStore('job', () => {
     selectedPlatform,
     sortBy,
     filteredApplications,
+    totalApplicationsCount,
+    responseRatePercent,
+    statusBreakdownData,
+    platformBreakdownData,
     fetchApplications,
     addApplication,
     updateApplication,
