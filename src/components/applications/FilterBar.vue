@@ -1,7 +1,9 @@
 <script setup>
+import { computed } from 'vue'
 import { useJobStore } from '@/stores/jobStore'
 import { useReferenceStore } from '@/stores/referenceStore'
-import { Search, X } from '@lucide/vue'
+import Select2 from '@/components/common/Select2.vue'
+import { Search, X, Tag, Globe, ArrowUpDown } from '@lucide/vue'
 
 const jobStore = useJobStore()
 const refStore = useReferenceStore()
@@ -10,6 +12,28 @@ function ucfirst(str) {
   if (!str) return ''
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
+
+const statusOptions = computed(() => {
+  const list = refStore.statuses.map(s => ({
+    id: s.id,
+    name: ucfirst(s.name),
+    color: s.color,
+  }))
+  return [{ id: '', name: 'Semua Status' }, ...list]
+})
+
+const platformOptions = computed(() => {
+  const list = refStore.platforms.map(p => ({
+    id: p.id,
+    name: p.label || p.name,
+  }))
+  return [{ id: '', name: 'Semua Platform' }, ...list]
+})
+
+const sortOptions = [
+  { id: 'latest', name: 'Terbaru' },
+  { id: 'oldest', name: 'Terlama' },
+]
 </script>
 
 <template>
@@ -35,49 +59,35 @@ function ucfirst(str) {
       </button>
     </div>
 
-    <!-- Status Dropdown -->
-    <div class="relative min-w-[140px]">
-      <select
+    <!-- Status Dropdown Select2 -->
+    <div class="min-w-[160px]">
+      <Select2
         v-model="jobStore.selectedStatus"
-        class="w-full pl-3 pr-8 py-2 rounded-xl border border-gray-200 dark:border-primary/60 bg-white dark:bg-primary text-primary-dark dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-accent-teal cursor-pointer min-h-[40px] appearance-none"
-      >
-        <option value="">Semua Status</option>
-        <option
-          v-for="status in refStore.statuses"
-          :key="status.id"
-          :value="status.id"
-        >
-          {{ ucfirst(status.name) }}
-        </option>
-      </select>
+        :options="statusOptions"
+        placeholder="Semua Status"
+        :icon="Tag"
+      />
     </div>
 
-    <!-- Platform Dropdown -->
-    <div class="relative min-w-[140px]">
-      <select
+    <!-- Platform Dropdown Select2 -->
+    <div class="min-w-[160px]">
+      <Select2
         v-model="jobStore.selectedPlatform"
-        class="w-full pl-3 pr-8 py-2 rounded-xl border border-gray-200 dark:border-primary/60 bg-white dark:bg-primary text-primary-dark dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-accent-teal cursor-pointer min-h-[40px] appearance-none"
-      >
-        <option value="">Semua Platform</option>
-        <option
-          v-for="platform in refStore.platforms"
-          :key="platform.id"
-          :value="platform.id"
-        >
-          {{ platform.label || platform.name }}
-        </option>
-      </select>
+        :options="platformOptions"
+        placeholder="Semua Platform"
+        :icon="Globe"
+      />
     </div>
 
-    <!-- Sort Toggle -->
-    <div class="relative min-w-[130px]">
-      <select
+    <!-- Sort Toggle Select2 -->
+    <div class="min-w-[140px]">
+      <Select2
         v-model="jobStore.sortBy"
-        class="w-full pl-3 pr-8 py-2 rounded-xl border border-gray-200 dark:border-primary/60 bg-white dark:bg-primary text-primary-dark dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-accent-teal cursor-pointer min-h-[40px] appearance-none"
-      >
-        <option value="latest">Terbaru</option>
-        <option value="oldest">Terlama</option>
-      </select>
+        :options="sortOptions"
+        placeholder="Urutkan"
+        :searchable="false"
+        :icon="ArrowUpDown"
+      />
     </div>
 
     <!-- Reset Filters Button -->

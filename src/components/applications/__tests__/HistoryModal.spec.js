@@ -20,7 +20,6 @@ describe('HistoryModal.vue', () => {
     })
 
     expect(wrapper.text()).toContain('Update Status Lamaran')
-    expect(wrapper.find('select').exists()).toBe(true)
     expect(wrapper.find('input[type="date"]').exists()).toBe(true)
   })
 })

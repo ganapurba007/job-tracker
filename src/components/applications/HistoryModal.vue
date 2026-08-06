@@ -1,7 +1,8 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import Modal from '@/components/common/Modal.vue'
 import Button from '@/components/common/Button.vue'
+import Select2 from '@/components/common/Select2.vue'
 import { useJobStore } from '@/stores/jobStore'
 import { useReferenceStore } from '@/stores/referenceStore'
 import { useToastStore } from '@/stores/toastStore'
@@ -28,6 +29,14 @@ const statusId = ref('')
 const createdAt = ref(new Date().toISOString().split('T')[0])
 const notes = ref('')
 const inlineErrors = ref({})
+
+const statusOptions = computed(() => {
+  return refStore.statuses.map(s => ({
+    id: s.id,
+    name: ucfirst(s.name),
+    color: s.color,
+  }))
+})
 
 watch(
   () => props.show,
@@ -92,34 +101,18 @@ function ucfirst(str) {
     @close="emit('close')"
   >
     <form @submit.prevent="handleSubmit" class="space-y-4" novalidate>
-      <!-- Status Selection -->
+      <!-- Status Selection Select2 -->
       <div>
         <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
           Status Terbaru <span class="text-red-500">*</span>
         </label>
-        <div class="relative rounded-xl shadow-xs">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-            <Tag class="w-4 h-4" />
-          </div>
-          <select
-            v-model="statusId"
-            :class="[
-              'w-full pl-9 pr-3 py-2 rounded-xl border bg-white dark:bg-primary text-primary-dark dark:text-gray-100 text-sm focus:outline-none focus:ring-2 transition-colors min-h-[40px]',
-              inlineErrors.statusId
-                ? 'border-red-500 focus:ring-red-400'
-                : 'border-gray-200 dark:border-primary/60 focus:ring-accent-teal',
-            ]"
-          >
-            <option value="" disabled>Pilih Status Baru</option>
-            <option
-              v-for="status in refStore.statuses"
-              :key="status.id"
-              :value="status.id"
-            >
-              {{ ucfirst(status.name) }}
-            </option>
-          </select>
-        </div>
+        <Select2
+          v-model="statusId"
+          :options="statusOptions"
+          placeholder="Pilih Status Baru"
+          :icon="Tag"
+          :error="!!inlineErrors.statusId"
+        />
         <p v-if="inlineErrors.statusId" class="mt-1 text-xs text-red-500">
           {{ inlineErrors.statusId }}
         </p>
