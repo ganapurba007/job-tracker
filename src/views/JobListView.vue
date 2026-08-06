@@ -1,15 +1,36 @@
 <script setup>
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useJobStore } from '@/stores/jobStore'
 import { useReferenceStore } from '@/stores/referenceStore'
 import FilterBar from '@/components/applications/FilterBar.vue'
 import JobCard from '@/components/applications/JobCard.vue'
+import JobFormModal from '@/components/applications/JobFormModal.vue'
+import ConfirmDeleteModal from '@/components/applications/ConfirmDeleteModal.vue'
 import Skeleton from '@/components/common/Skeleton.vue'
 import Button from '@/components/common/Button.vue'
 import { Briefcase, Plus, FolderOpen } from '@lucide/vue'
 
 const jobStore = useJobStore()
 const refStore = useReferenceStore()
+
+const showFormModal = ref(false)
+const showDeleteModal = ref(false)
+const targetApplication = ref(null)
+
+function openCreateModal() {
+  targetApplication.value = null
+  showFormModal.value = true
+}
+
+function openEditModal(app) {
+  targetApplication.value = app
+  showFormModal.value = true
+}
+
+function openDeleteModal(app) {
+  targetApplication.value = app
+  showDeleteModal.value = true
+}
 
 onMounted(async () => {
   await Promise.all([
@@ -33,12 +54,10 @@ onMounted(async () => {
         </p>
       </div>
 
-      <router-link to="/job-applications/new">
-        <Button variant="orange">
-          <Plus class="w-4 h-4 mr-2" />
-          Tambah Lamaran
-        </Button>
-      </router-link>
+      <Button variant="orange" @click="openCreateModal">
+        <Plus class="w-4 h-4 mr-2" />
+        Tambah Lamaran
+      </Button>
     </div>
 
     <!-- Filter Control Bar -->
@@ -56,6 +75,8 @@ onMounted(async () => {
         v-for="app in jobStore.filteredApplications"
         :key="app.id"
         :application="app"
+        @edit="openEditModal"
+        @delete="openDeleteModal"
       />
     </div>
 
@@ -90,13 +111,25 @@ onMounted(async () => {
         >
           Reset Semua Filter
         </button>
-        <router-link v-else to="/job-applications/new">
-          <Button variant="accent">
-            <Plus class="w-4 h-4 mr-2" />
-            Tambah Lamaran Pertama
-          </Button>
-        </router-link>
+        <Button v-else variant="accent" @click="openCreateModal">
+          <Plus class="w-4 h-4 mr-2" />
+          Tambah Lamaran Pertama
+        </Button>
       </div>
     </div>
+
+    <!-- Job Form Modal (Create & Edit) -->
+    <JobFormModal
+      :show="showFormModal"
+      :application="targetApplication"
+      @close="showFormModal = false"
+    />
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmDeleteModal
+      :show="showDeleteModal"
+      :application="targetApplication"
+      @close="showDeleteModal = false"
+    />
   </div>
 </template>

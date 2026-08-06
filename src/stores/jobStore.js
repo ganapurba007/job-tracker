@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { jobService } from '@/services/jobService'
+import { useReferenceStore } from '@/stores/referenceStore'
 
 export const useJobStore = defineStore('job', () => {
   const initialApplications = [
@@ -121,6 +122,88 @@ export const useJobStore = defineStore('job', () => {
     }
   }
 
+  async function addApplication(payload) {
+    loading.value = true
+    error.value = null
+    const refStore = useReferenceStore()
+    const foundStatus = refStore.statuses.find(s => String(s.id) === String(payload.status_id)) || { id: payload.status_id, name: 'Status', color: '#325E6A' }
+    const foundPlatform = refStore.platforms.find(p => String(p.id) === String(payload.platform_id)) || { id: payload.platform_id, name: 'Platform' }
+
+    try {
+      const res = await jobService.createApplication(payload)
+      const newApp = res.data || res
+      applications.value.unshift(newApp)
+      return newApp
+    } catch (err) {
+      // Fallback local create for offline/demo mode
+      const newApp = {
+        id: Date.now(),
+        ...payload,
+        status: foundStatus,
+        platform: foundPlatform,
+        histories: [
+          {
+            id: Date.now(),
+            status: foundStatus,
+            created_at: payload.applied_at || new Date().toISOString().split('T')[0],
+            notes: payload.notes || 'Catatan awal lamaran'
+          }
+        ]
+      }
+      applications.value.unshift(newApp)
+      return newApp
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function updateApplication(id, payload) {
+    loading.value = true
+    error.value = null
+    const refStore = useReferenceStore()
+    const foundStatus = refStore.statuses.find(s => String(s.id) === String(payload.status_id))
+    const foundPlatform = refStore.platforms.find(p => String(p.id) === String(payload.platform_id))
+
+    try {
+      const res = await jobService.updateApplication(id, payload)
+      const updated = res.data || res
+      const idx = applications.value.findIndex(a => String(a.id) === String(id))
+      if (idx !== -1) {
+        applications.value[idx] = { ...applications.value[idx], ...updated }
+      }
+      return updated
+    } catch (err) {
+      // Fallback local update
+      const idx = applications.value.findIndex(a => String(a.id) === String(id))
+      if (idx !== -1) {
+        const existing = applications.value[idx]
+        const updated = {
+          ...existing,
+          ...payload,
+          status: foundStatus || existing.status,
+          platform: foundPlatform || existing.platform,
+        }
+        applications.value[idx] = updated
+        return updated
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function deleteApplication(id) {
+    loading.value = true
+    error.value = null
+    try {
+      await jobService.deleteApplication(id)
+    } catch (err) {
+      // Local fallback delete
+    } finally {
+      applications.value = applications.value.filter(a => String(a.id) !== String(id))
+      loading.value = false
+    }
+  }
+
   function setSearchQuery(query) {
     searchQuery.value = query
   }
@@ -154,6 +237,9 @@ export const useJobStore = defineStore('job', () => {
     sortBy,
     filteredApplications,
     fetchApplications,
+    addApplication,
+    updateApplication,
+    deleteApplication,
     setSearchQuery,
     setFilterStatus,
     setFilterPlatform,

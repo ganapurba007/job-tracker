@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import Badge from '@/components/common/Badge.vue'
-import { Building2, Calendar, ExternalLink, Globe, ChevronRight } from '@lucide/vue'
+import { Building2, Calendar, Globe, ChevronRight, Pencil, Trash2 } from '@lucide/vue'
 
 const props = defineProps({
   application: {
@@ -9,6 +9,8 @@ const props = defineProps({
     required: true,
   },
 })
+
+const emit = defineEmits(['edit', 'delete'])
 
 const formatDate = computed(() => {
   if (!props.application.applied_at) return '-'
@@ -62,20 +64,40 @@ const formatDate = computed(() => {
       </div>
     </div>
 
-    <!-- Bottom Footer Row: Date & Action Link -->
+    <!-- Bottom Footer Row: Date & Action Links -->
     <div class="mt-4 pt-3 border-t border-gray-100 dark:border-primary/50 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
       <div class="flex items-center space-x-1">
-        <Calendar class="w-3.5 h-3.5" />
+        <Calendar class="w-3.5 h-3.5 text-gray-400" />
         <span>{{ formatDate }}</span>
       </div>
 
-      <router-link
-        :to="`/job-applications/${application.id}`"
-        class="inline-flex items-center font-semibold text-accent-teal hover:text-accent-orange transition-colors"
-      >
-        <span>Detail</span>
-        <ChevronRight class="w-4 h-4 ml-0.5 group-hover:translate-x-1 transition-transform" />
-      </router-link>
+      <div class="flex items-center space-x-2">
+        <button
+          type="button"
+          @click="emit('edit', application)"
+          class="p-1.5 rounded-lg text-gray-400 hover:text-accent-teal hover:bg-gray-100 dark:hover:bg-primary/60 transition-colors cursor-pointer"
+          title="Edit Lamaran"
+        >
+          <Pencil class="w-3.5 h-3.5" />
+        </button>
+
+        <button
+          type="button"
+          @click="emit('delete', application)"
+          class="p-1.5 rounded-lg text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+          title="Hapus Lamaran"
+        >
+          <Trash2 class="w-3.5 h-3.5" />
+        </button>
+
+        <router-link
+          :to="`/job-applications/${application.id}`"
+          class="inline-flex items-center font-semibold text-accent-teal hover:text-accent-orange transition-colors ml-1"
+        >
+          <span>Detail</span>
+          <ChevronRight class="w-4 h-4 ml-0.5 group-hover:translate-x-1 transition-transform" />
+        </router-link>
+      </div>
     </div>
   </div>
 </template>
