@@ -138,6 +138,28 @@ export const useJobStore = defineStore('job', () => {
     }
   }
 
+  async function fetchApplication(id) {
+    loading.value = true
+    error.value = null
+    try {
+      const data = await jobService.getApplication(id)
+      const app = data.data || data
+      const normalized = normalizeApplication(app)
+      const idx = applications.value.findIndex(a => String(a.id) === String(id))
+      if (idx !== -1) {
+        applications.value[idx] = normalized
+      } else {
+        applications.value.push(normalized)
+      }
+      return normalized
+    } catch (err) {
+      error.value = err?.response?.data?.message || 'Gagal mengambil detail lamaran'
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function addApplication(payload) {
     loading.value = true
     error.value = null
@@ -190,6 +212,7 @@ export const useJobStore = defineStore('job', () => {
     try {
       const res = await jobService.updateApplication(id, finalPayload)
       await fetchApplications()
+      await fetchApplication(id).catch(() => {})
       return res.data || res
     } catch (err) {
       error.value = err?.response?.data?.message || 'Gagal memperbarui data lamaran'
@@ -224,6 +247,7 @@ export const useJobStore = defineStore('job', () => {
     }
     try {
       await jobService.addStatusHistory(applicationId, historyPayload)
+      await fetchApplication(applicationId)
       await fetchApplications()
     } catch (err) {
       error.value = err?.response?.data?.message || 'Gagal menambahkan riwayat status'
@@ -271,6 +295,7 @@ export const useJobStore = defineStore('job', () => {
     statusBreakdownData,
     platformBreakdownData,
     fetchApplications,
+    fetchApplication,
     addApplication,
     updateApplication,
     deleteApplication,

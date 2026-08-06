@@ -14,8 +14,8 @@ const props = defineProps({
 const sortedHistories = computed(() => {
   if (!props.histories) return []
   return [...props.histories].sort((a, b) => {
-    const timeA = new Date(a.created_at || a.date).getTime()
-    const timeB = new Date(b.created_at || b.date).getTime()
+    const timeA = new Date(a.change_at || a.created_at || a.date || 0).getTime()
+    const timeB = new Date(b.change_at || b.created_at || b.date || 0).getTime()
     return timeB - timeA // Newest first
   })
 })
@@ -63,7 +63,7 @@ function formatDate(dateStr) {
               size="md"
             />
             <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
-              {{ formatDate(item.created_at || item.date) }}
+              {{ formatDate(item.change_at || item.created_at || item.date) }}
             </span>
           </div>
 

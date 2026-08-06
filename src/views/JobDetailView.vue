@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useJobStore } from '@/stores/jobStore'
 import { useReferenceStore } from '@/stores/referenceStore'
@@ -27,16 +27,17 @@ const application = computed(() => {
 })
 
 const formatDate = computed(() => {
-  if (!application.value?.applied_date) return '-'
+  const dateVal = application.value?.applied_date || application.value?.applied_at
+  if (!dateVal) return '-'
   try {
-    const d = new Date(application.value.applied_date)
+    const d = new Date(dateVal)
     return new Intl.DateTimeFormat('id-ID', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
     }).format(d)
   } catch (e) {
-    return application.value.applied_date
+    return dateVal
   }
 })
 
@@ -44,11 +45,24 @@ function handleDeleted() {
   router.push('/job-applications')
 }
 
+async function loadDetailData() {
+  if (applicationId.value) {
+    await jobStore.fetchApplication(applicationId.value)
+  }
+}
+
 onMounted(async () => {
   await Promise.all([
     refStore.fetchReferences(),
     jobStore.fetchApplications(),
   ])
+  await loadDetailData()
+})
+
+watch(applicationId, async (newId) => {
+  if (newId) {
+    await loadDetailData()
+  }
 })
 </script>
 
@@ -116,16 +130,16 @@ onMounted(async () => {
             <span class="font-semibold">{{ formatDate }}</span>
           </div>
 
-          <div v-if="application.job_url" class="flex items-center min-w-0">
+          <div v-if="application.job_link || application.job_url" class="flex items-center min-w-0">
             <ExternalLink class="w-4 h-4 mr-2 text-accent-teal shrink-0" />
             <span class="font-medium text-gray-600 dark:text-gray-300 mr-1 shrink-0">Link Lowongan:</span>
             <a
-              :href="application.job_url"
+              :href="application.job_link || application.job_url"
               target="_blank"
               rel="noopener noreferrer"
               class="text-accent-teal hover:underline font-semibold truncate"
             >
-              {{ application.job_url }}
+              {{ application.job_link || application.job_url }}
             </a>
           </div>
         </div>
@@ -143,7 +157,7 @@ onMounted(async () => {
       </div>
 
       <!-- Chronological Visual Timeline -->
-      <Timeline :histories="application.histories || []" />
+      <Timeline :histories="application.application_histories || application.histories || []" />
     </template>
 
     <!-- Not Found State if invalid ID -->
