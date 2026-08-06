@@ -88,11 +88,24 @@ export const useJobStore = defineStore('job', () => {
       if (sId) counts[sId] = (counts[sId] || 0) + 1
     })
 
-    const labels = refStore.statuses.map(s => s.name ? (s.name.charAt(0).toUpperCase() + s.name.slice(1)) : '')
-    const data = refStore.statuses.map(s => counts[s.id] || 0)
-    const backgroundColor = refStore.statuses.map(s => s.color || '#325E6A')
+    const items = refStore.statuses.map(s => {
+      const count = counts[s.id] || 0
+      const total = userApplications.value.length
+      const percentage = total > 0 ? Math.round((count / total) * 100) : 0
+      return {
+        id: s.id,
+        name: s.name ? (s.name.charAt(0).toUpperCase() + s.name.slice(1)) : '',
+        color: s.color || '#325E6A',
+        count,
+        percentage,
+      }
+    })
 
-    return { labels, data, backgroundColor }
+    const labels = items.map(i => i.name)
+    const data = items.map(i => i.count)
+    const backgroundColor = items.map(i => i.color)
+
+    return { labels, data, backgroundColor, items }
   })
 
   const platformBreakdownData = computed(() => {
