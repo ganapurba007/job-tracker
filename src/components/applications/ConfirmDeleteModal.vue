@@ -2,6 +2,7 @@
 import Modal from '@/components/common/Modal.vue'
 import Button from '@/components/common/Button.vue'
 import { useJobStore } from '@/stores/jobStore'
+import { useToastStore } from '@/stores/toastStore'
 import { AlertTriangle } from '@lucide/vue'
 
 const props = defineProps({
@@ -18,10 +19,12 @@ const props = defineProps({
 const emit = defineEmits(['close', 'deleted'])
 
 const jobStore = useJobStore()
+const toastStore = useToastStore()
 
 async function handleConfirmDelete() {
   if (!props.application || !props.application.id) return
   await jobStore.deleteApplication(props.application.id)
+  toastStore.showToast('Lamaran berhasil dihapus.', 'info')
   emit('deleted')
   emit('close')
 }

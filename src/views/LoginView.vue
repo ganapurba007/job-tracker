@@ -2,11 +2,13 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { useToastStore } from '@/stores/toastStore'
 import Button from '@/components/common/Button.vue'
 import { Mail, Lock, Sparkles, LogIn } from '@lucide/vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const toastStore = useToastStore()
 
 const email = ref('')
 const password = ref('')
@@ -35,6 +37,7 @@ async function handleLogin() {
 
   try {
     await authStore.login(email.value, password.value)
+    toastStore.showToast('Berhasil masuk ke akun!', 'success')
     router.push('/dashboard')
   } catch (err) {
     // Error is set in store
@@ -44,6 +47,7 @@ async function handleLogin() {
 async function handleDemoLogin() {
   try {
     await authStore.demoLogin()
+    toastStore.showToast('Selamat datang di Mode Demo Portfolio!', 'success')
     router.push('/dashboard')
   } catch (err) {
     // Handled

@@ -10,7 +10,7 @@ describe('JobCard.vue', () => {
       position: 'Frontend Engineer',
       applied_at: '2026-08-01',
       status: { name: 'Wawancara', color: '#44A1A4' },
-      platform: { name: 'LinkedIn' },
+      platform: { name: 'LinkedIn', label: 'LinkedIn' },
       notes: 'Test note',
     }
 

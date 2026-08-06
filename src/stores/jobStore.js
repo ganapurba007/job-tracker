@@ -126,7 +126,7 @@ export const useJobStore = defineStore('job', () => {
       counts[sId] = (counts[sId] || 0) + 1
     })
 
-    const labels = refStore.statuses.map(s => s.name)
+    const labels = refStore.statuses.map(s => s.name ? (s.name.charAt(0).toUpperCase() + s.name.slice(1)) : '')
     const data = refStore.statuses.map(s => counts[s.id] || 0)
     const backgroundColor = refStore.statuses.map(s => s.color || '#325E6A')
 
@@ -143,7 +143,7 @@ export const useJobStore = defineStore('job', () => {
       counts[pId] = (counts[pId] || 0) + 1
     })
 
-    const labels = refStore.platforms.map(p => p.name)
+    const labels = refStore.platforms.map(p => p.label || p.name)
     const data = refStore.platforms.map(p => counts[p.id] || 0)
 
     return { labels, data }

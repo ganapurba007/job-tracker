@@ -17,6 +17,11 @@ const props = defineProps({
   },
 })
 
+const formattedText = computed(() => {
+  if (!props.text) return ''
+  return props.text.charAt(0).toUpperCase() + props.text.slice(1)
+})
+
 const badgeStyle = computed(() => {
   const hex = props.color || '#325E6A'
   return {
@@ -51,6 +56,6 @@ const sizeClasses = computed(() => {
       class="w-1.5 h-1.5 rounded-full mr-1.5 shrink-0"
       :style="{ backgroundColor: color || '#325E6A' }"
     ></span>
-    <span>{{ text }}</span>
+    <span>{{ formattedText }}</span>
   </span>
 </template>

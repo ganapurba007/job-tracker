@@ -4,6 +4,7 @@ import Modal from '@/components/common/Modal.vue'
 import Button from '@/components/common/Button.vue'
 import { useJobStore } from '@/stores/jobStore'
 import { useReferenceStore } from '@/stores/referenceStore'
+import { useToastStore } from '@/stores/toastStore'
 import { Building2, Briefcase, Globe, Tag, Calendar, Link as LinkIcon, FileText } from '@lucide/vue'
 
 const props = defineProps({
@@ -21,6 +22,7 @@ const emit = defineEmits(['close', 'saved'])
 
 const jobStore = useJobStore()
 const refStore = useReferenceStore()
+const toastStore = useToastStore()
 
 const companyName = ref('')
 const position = ref('')
@@ -98,12 +100,18 @@ async function handleSubmit() {
 
   if (props.application && props.application.id) {
     await jobStore.updateApplication(props.application.id, payload)
+    toastStore.showToast('Data lamaran berhasil diperbarui!', 'success')
   } else {
     await jobStore.addApplication(payload)
+    toastStore.showToast('Lamaran baru berhasil ditambahkan!', 'success')
   }
 
   emit('saved')
   emit('close')
+}
+function ucfirst(str) {
+  if (!str) return ''
+  return str.charAt(0).toUpperCase() + str.slice(1)
 }
 </script>
 
@@ -196,7 +204,7 @@ async function handleSubmit() {
                 :key="platform.id"
                 :value="platform.id"
               >
-                {{ platform.name }}
+                {{ platform.label || platform.name }}
               </option>
             </select>
           </div>
@@ -229,7 +237,7 @@ async function handleSubmit() {
                 :key="status.id"
                 :value="status.id"
               >
-                {{ status.name }}
+                {{ ucfirst(status.name) }}
               </option>
             </select>
           </div>

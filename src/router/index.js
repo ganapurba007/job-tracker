@@ -5,6 +5,7 @@ import RegisterView from '@/views/RegisterView.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import JobListView from '@/views/JobListView.vue'
 import JobDetailView from '@/views/JobDetailView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 
 const routes = [
   {
@@ -43,7 +44,8 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/dashboard',
+    name: 'not-found',
+    component: NotFoundView,
   },
 ]
 

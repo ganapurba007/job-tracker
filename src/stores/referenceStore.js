@@ -12,11 +12,11 @@ export const useReferenceStore = defineStore('reference', () => {
   ])
 
   const platforms = ref([
-    { id: 1, name: 'LinkedIn' },
-    { id: 2, name: 'JobStreet' },
-    { id: 3, name: 'Glints' },
-    { id: 4, name: 'Kalibrr' },
-    { id: 5, name: 'Company Website' },
+    { id: 1, name: 'LinkedIn', label: 'LinkedIn' },
+    { id: 2, name: 'JobStreet', label: 'JobStreet' },
+    { id: 3, name: 'Glints', label: 'Glints' },
+    { id: 4, name: 'Kalibrr', label: 'Kalibrr' },
+    { id: 5, name: 'Company Website', label: 'Company Website' },
   ])
 
   const loading = ref(false)
@@ -38,7 +38,12 @@ export const useReferenceStore = defineStore('reference', () => {
 
       if (resPlatforms) {
         const platformList = Array.isArray(resPlatforms) ? resPlatforms : (resPlatforms.data || resPlatforms)
-        if (platformList && platformList.length) platforms.value = platformList
+        if (platformList && platformList.length) {
+          platforms.value = platformList.map(p => ({
+            ...p,
+            label: p.label || p.name,
+          }))
+        }
       }
 
       isFetched.value = true

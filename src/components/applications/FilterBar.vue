@@ -1,10 +1,15 @@
 <script setup>
 import { useJobStore } from '@/stores/jobStore'
 import { useReferenceStore } from '@/stores/referenceStore'
-import { Search, Filter, ArrowUpDown, X } from '@lucide/vue'
+import { Search, X } from '@lucide/vue'
 
 const jobStore = useJobStore()
 const refStore = useReferenceStore()
+
+function ucfirst(str) {
+  if (!str) return ''
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
 </script>
 
 <template>
@@ -42,7 +47,7 @@ const refStore = useReferenceStore()
           :key="status.id"
           :value="status.id"
         >
-          {{ status.name }}
+          {{ ucfirst(status.name) }}
         </option>
       </select>
     </div>
@@ -59,7 +64,7 @@ const refStore = useReferenceStore()
           :key="platform.id"
           :value="platform.id"
         >
-          {{ platform.name }}
+          {{ platform.label || platform.name }}
         </option>
       </select>
     </div>

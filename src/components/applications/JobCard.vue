@@ -13,16 +13,17 @@ const props = defineProps({
 const emit = defineEmits(['edit', 'delete'])
 
 const formatDate = computed(() => {
-  if (!props.application.applied_at) return '-'
+  const dateVal = props.application.applied_date || props.application.applied_date
+  if (!dateVal) return '-'
   try {
-    const d = new Date(props.application.applied_at)
+    const d = new Date(dateVal)
     return new Intl.DateTimeFormat('id-ID', {
       day: 'numeric',
-      month: 'short',
+      month: 'long',
       year: 'numeric',
     }).format(d)
   } catch (e) {
-    return props.application.applied_at
+    return dateVal
   }
 })
 </script>
@@ -59,7 +60,7 @@ const formatDate = computed(() => {
       <div class="flex items-center space-x-2 pt-1">
         <span class="inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-primary/60 text-gray-700 dark:text-gray-200">
           <Globe class="w-3 h-3 mr-1 text-accent-teal" />
-          {{ application.platform?.name || 'Platform' }}
+          {{ application.platform?.label || application.platform?.name || 'Platform' }}
         </span>
       </div>
     </div>

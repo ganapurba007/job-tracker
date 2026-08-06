@@ -9,21 +9,21 @@ import Timeline from '@/components/applications/Timeline.vue'
 import JobFormModal from '@/components/applications/JobFormModal.vue'
 import HistoryModal from '@/components/applications/HistoryModal.vue'
 import ConfirmDeleteModal from '@/components/applications/ConfirmDeleteModal.vue'
-import { ArrowLeft, Building2, Globe, Calendar, ExternalLink, PlusCircle, Pencil, Trash2, FileText, AlertCircle } from '@lucide/vue'
+import { ArrowLeft, Building2, Calendar, Globe, ExternalLink, Pencil, Trash2, Plus, FileText } from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()
 const jobStore = useJobStore()
 const refStore = useReferenceStore()
 
-const showFormModal = ref(false)
+const showEditModal = ref(false)
 const showHistoryModal = ref(false)
 const showDeleteModal = ref(false)
 
-const appId = computed(() => route.params.id)
+const applicationId = computed(() => route.params.id)
 
 const application = computed(() => {
-  return jobStore.applications.find((a) => String(a.id) === String(appId.value)) || null
+  return jobStore.applications.find(a => String(a.id) === String(applicationId.value))
 })
 
 const formatDate = computed(() => {
@@ -79,7 +79,7 @@ onMounted(async () => {
               />
               <span class="inline-flex items-center text-xs font-medium px-3 py-1 rounded-full bg-gray-100 dark:bg-primary/60 text-gray-700 dark:text-gray-200">
                 <Globe class="w-3.5 h-3.5 mr-1 text-accent-teal" />
-                {{ application.platform?.name || 'Platform' }}
+                {{ application.platform?.label || application.platform?.name || 'Platform' }}
               </span>
             </div>
 
@@ -93,83 +93,67 @@ onMounted(async () => {
             </div>
           </div>
 
-          <!-- Quick Action Buttons -->
+          <!-- Action Buttons Bar -->
           <div class="flex items-center space-x-2 shrink-0">
-            <Button
-              variant="orange"
-              @click="showHistoryModal = true"
-            >
-              <PlusCircle class="w-4 h-4 mr-1.5" />
+            <Button variant="orange" @click="showHistoryModal = true">
+              <Plus class="w-4 h-4 mr-1.5" />
               Update Status
             </Button>
-            <Button
-              variant="secondary"
-              @click="showFormModal = true"
-              title="Edit Data"
-            >
+            <Button variant="secondary" @click="showEditModal = true">
               <Pencil class="w-4 h-4" />
             </Button>
-            <Button
-              variant="danger"
-              @click="showDeleteModal = true"
-              title="Hapus Lamaran"
-            >
+            <Button variant="danger" @click="showDeleteModal = true">
               <Trash2 class="w-4 h-4" />
             </Button>
           </div>
         </div>
 
-        <!-- Meta Info Grid -->
-        <div class="pt-4 border-t border-gray-100 dark:border-primary/60 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div class="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
-            <Calendar class="w-4 h-4 text-accent-teal" />
-            <span>Tanggal Melamar: <strong class="text-primary-dark dark:text-gray-100">{{ formatDate }}</strong></span>
+        <!-- Meta info grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-100 dark:border-primary/60 text-xs">
+          <div class="flex items-center text-gray-600 dark:text-gray-300">
+            <Calendar class="w-4 h-4 mr-2 text-gray-400" />
+            <span class="font-medium mr-1">Melamar pada:</span>
+            <span class="font-semibold">{{ formatDate }}</span>
           </div>
 
-          <div v-if="application.job_url" class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 truncate">
-            <ExternalLink class="w-4 h-4 text-accent-teal shrink-0" />
-            <span class="truncate">Link:
-              <a
-                :href="application.job_url"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-accent-teal font-semibold hover:underline"
-              >
-                {{ application.job_url }}
-              </a>
-            </span>
+          <div v-if="application.job_url" class="flex items-center min-w-0">
+            <ExternalLink class="w-4 h-4 mr-2 text-accent-teal shrink-0" />
+            <span class="font-medium text-gray-600 dark:text-gray-300 mr-1 shrink-0">Link Lowongan:</span>
+            <a
+              :href="application.job_url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-accent-teal hover:underline font-semibold truncate"
+            >
+              {{ application.job_url }}
+            </a>
           </div>
         </div>
 
-        <!-- Initial Notes Card -->
-        <div v-if="application.notes" class="p-4 rounded-xl bg-gray-50 dark:bg-primary/40 border border-gray-100 dark:border-primary/50 space-y-1">
-          <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-1">
-            <FileText class="w-3.5 h-3.5 text-accent-teal" />
-            <span>Catatan Awal:</span>
+        <!-- Initial Notes section -->
+        <div v-if="application.notes" class="p-4 rounded-xl bg-slate-50 dark:bg-primary/40 border border-gray-100 dark:border-primary/60 space-y-1">
+          <div class="flex items-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <FileText class="w-3.5 h-3.5 mr-1" />
+            <span>Catatan Awal</span>
           </div>
-          <p class="text-xs text-primary-dark dark:text-gray-200">
+          <p class="text-xs sm:text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
             {{ application.notes }}
           </p>
         </div>
       </div>
 
-      <!-- Vertical Visual Timeline Section -->
-      <div class="bg-white dark:bg-primary-dark/90 rounded-2xl border border-gray-100 dark:border-primary p-6 shadow-sm">
-        <Timeline :histories="application.histories" />
-      </div>
+      <!-- Chronological Visual Timeline -->
+      <Timeline :histories="application.histories || []" />
     </template>
 
-    <!-- Not Found Fallback -->
-    <div
-      v-else
-      class="py-16 px-4 text-center bg-white dark:bg-primary-dark rounded-2xl border border-gray-100 dark:border-primary space-y-4"
-    >
-      <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 mx-auto">
-        <AlertCircle class="w-6 h-6" />
-      </div>
-      <h3 class="text-lg font-bold text-primary-dark dark:text-gray-100">
-        Lamaran Kerja Tidak Ditemukan
+    <!-- Not Found State if invalid ID -->
+    <div v-else class="p-12 text-center bg-white dark:bg-primary-dark/80 rounded-2xl border border-gray-100 dark:border-primary shadow-xs space-y-4">
+      <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200">
+        Data Lamaran Tidak Ditemukan
       </h3>
+      <p class="text-xs text-gray-500">
+        Lamaran kerja yang Anda cari mungkin telah dihapus atau URL tidak valid.
+      </p>
       <router-link to="/job-applications">
         <Button variant="accent">
           Kembali ke Daftar Lamaran
@@ -179,14 +163,14 @@ onMounted(async () => {
 
     <!-- Modals -->
     <JobFormModal
-      :show="showFormModal"
+      :show="showEditModal"
       :application="application"
-      @close="showFormModal = false"
+      @close="showEditModal = false"
     />
 
     <HistoryModal
       :show="showHistoryModal"
-      :application-id="appId"
+      :application-id="application?.id"
       @close="showHistoryModal = false"
     />
 

@@ -3,10 +3,10 @@ import { mount } from '@vue/test-utils'
 import Badge from '@/components/common/Badge.vue'
 
 describe('Badge.vue', () => {
-  it('renders badge text and custom color props', () => {
+  it('renders badge text in ucfirst and custom color props', () => {
     const wrapper = mount(Badge, {
       props: {
-        text: 'Wawancara',
+        text: 'wawancara',
         color: '#44A1A4',
       },
     })

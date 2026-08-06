@@ -4,6 +4,7 @@ import Modal from '@/components/common/Modal.vue'
 import Button from '@/components/common/Button.vue'
 import { useJobStore } from '@/stores/jobStore'
 import { useReferenceStore } from '@/stores/referenceStore'
+import { useToastStore } from '@/stores/toastStore'
 import { Tag, Calendar, FileText } from '@lucide/vue'
 
 const props = defineProps({
@@ -21,6 +22,7 @@ const emit = defineEmits(['close', 'saved'])
 
 const jobStore = useJobStore()
 const refStore = useReferenceStore()
+const toastStore = useToastStore()
 
 const statusId = ref('')
 const createdAt = ref(new Date().toISOString().split('T')[0])
@@ -61,8 +63,13 @@ async function handleSubmit() {
     notes: notes.value.trim(),
   })
 
+  toastStore.showToast('Riwayat status berhasil diperbarui!', 'success')
   emit('saved')
   emit('close')
+}
+function ucfirst(str) {
+  if (!str) return ''
+  return str.charAt(0).toUpperCase() + str.slice(1)
 }
 </script>
 
@@ -98,7 +105,7 @@ async function handleSubmit() {
               :key="status.id"
               :value="status.id"
             >
-              {{ status.name }}
+              {{ ucfirst(status.name) }}
             </option>
           </select>
         </div>
