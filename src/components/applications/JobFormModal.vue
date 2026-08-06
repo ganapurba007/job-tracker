@@ -44,7 +44,7 @@ watch(
         position.value = props.application.position || ''
         platformId.value = props.application.platform_id || ''
         statusId.value = props.application.status_id || ''
-        appliedAt.value = props.application.applied_at || new Date().toISOString().split('T')[0]
+        appliedAt.value = props.application.applied_date || new Date().toISOString().split('T')[0]
         jobUrl.value = props.application.job_url || ''
         notes.value = props.application.notes || ''
       } else {
@@ -93,7 +93,7 @@ async function handleSubmit() {
     position: position.value.trim(),
     platform_id: Number(platformId.value),
     status_id: Number(statusId.value),
-    applied_at: appliedAt.value,
+    applied_date: appliedAt.value,
     job_url: jobUrl.value.trim(),
     notes: notes.value.trim(),
   }

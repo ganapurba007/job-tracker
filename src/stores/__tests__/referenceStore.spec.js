@@ -16,10 +16,10 @@ describe('referenceStore', () => {
     vi.clearAllMocks()
   })
 
-  it('has initial default statuses and platforms', () => {
+  it('starts with empty initial statuses and platforms', () => {
     const store = useReferenceStore()
-    expect(store.statuses.length).toBeGreaterThan(0)
-    expect(store.platforms.length).toBeGreaterThan(0)
+    expect(store.statuses).toEqual([])
+    expect(store.platforms).toEqual([])
   })
 
   it('fetches reference data from API and caches it', async () => {

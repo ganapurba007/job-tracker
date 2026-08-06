@@ -8,7 +8,7 @@ describe('JobCard.vue', () => {
       id: 1,
       company_name: 'TechCorp Indonesia',
       position: 'Frontend Engineer',
-      applied_at: '2026-08-01',
+      applied_date: '2026-08-01',
       status: { name: 'Wawancara', color: '#44A1A4' },
       platform: { name: 'LinkedIn', label: 'LinkedIn' },
       notes: 'Test note',

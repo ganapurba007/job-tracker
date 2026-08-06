@@ -27,16 +27,16 @@ const application = computed(() => {
 })
 
 const formatDate = computed(() => {
-  if (!application.value?.applied_at) return '-'
+  if (!application.value?.applied_date) return '-'
   try {
-    const d = new Date(application.value.applied_at)
+    const d = new Date(application.value.applied_date)
     return new Intl.DateTimeFormat('id-ID', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
     }).format(d)
   } catch (e) {
-    return application.value.applied_at
+    return application.value.applied_date
   }
 })
 
