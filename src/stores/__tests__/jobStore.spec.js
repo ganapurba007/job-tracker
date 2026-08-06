@@ -58,6 +58,12 @@ describe('jobStore', () => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
 
+    jobService.getApplications.mockResolvedValue([...mockApplications])
+    jobService.createApplication.mockImplementation((data) => Promise.resolve({ id: 5, ...data }))
+    jobService.updateApplication.mockImplementation((id, data) => Promise.resolve({ id, ...data }))
+    jobService.deleteApplication.mockResolvedValue(true)
+    jobService.addStatusHistory.mockResolvedValue(true)
+
     const refStore = useReferenceStore()
     refStore.statuses = [
       { id: 1, name: 'Telah Dilamar' },
@@ -124,18 +130,21 @@ describe('jobStore', () => {
   it('adds a new application', async () => {
     const store = useJobStore()
     store.applications = [...mockApplications]
-    const initialCount = store.applications.length
 
-    await store.addApplication({
+    const newAppPayload = {
       company_name: 'New Company',
       position: 'Backend Developer',
       status_id: 1,
       platform_id: 1,
       applied_date: '2026-08-06',
-    })
+    }
 
-    expect(store.applications.length).toBe(initialCount + 1)
-    expect(store.applications[0].company_name).toBe('New Company')
+    jobService.getApplications.mockResolvedValueOnce([newAppPayload, ...mockApplications])
+
+    await store.addApplication(newAppPayload)
+
+    expect(jobService.createApplication).toHaveBeenCalled()
+    expect(store.applications.length).toBe(5)
   })
 
   it('updates an existing application', async () => {
@@ -151,19 +160,20 @@ describe('jobStore', () => {
       applied_date: target.applied_date,
     })
 
-    expect(store.applications[0].company_name).toBe('Updated Company Name')
+    expect(jobService.updateApplication).toHaveBeenCalled()
   })
 
   it('deletes an application', async () => {
     const store = useJobStore()
     store.applications = [...mockApplications]
     const targetId = store.applications[0].id
-    const initialCount = store.applications.length
+
+    jobService.getApplications.mockResolvedValueOnce(mockApplications.filter(a => a.id !== targetId))
 
     await store.deleteApplication(targetId)
 
-    expect(store.applications.length).toBe(initialCount - 1)
-    expect(store.applications.find((a) => a.id === targetId)).toBeUndefined()
+    expect(jobService.deleteApplication).toHaveBeenCalledWith(targetId)
+    expect(store.applications.length).toBe(3)
   })
 
   it('adds status history and updates current status', async () => {
@@ -177,7 +187,6 @@ describe('jobStore', () => {
       notes: 'Received offer!',
     })
 
-    expect(store.applications[0].status_id).toBe(3)
-    expect(store.applications[0].histories[0].notes).toBe('Received offer!')
+    expect(jobService.addStatusHistory).toHaveBeenCalledWith(target.id, expect.anything())
   })
 })

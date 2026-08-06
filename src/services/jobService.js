@@ -27,7 +27,7 @@ export const jobService = {
   },
 
   async addStatusHistory(id, historyData) {
-    const response = await api.post(`/job-applications/${id}/histories`, historyData)
+    const response = await api.post(`/job-applications/${id}/history`, historyData)
     return response.data
   },
 }

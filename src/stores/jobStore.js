@@ -15,6 +15,21 @@ export const useJobStore = defineStore('job', () => {
   const selectedPlatform = ref('')
   const sortBy = ref('latest')
 
+  function normalizeApplication(app) {
+    if (!app) return app
+    return {
+      ...app,
+      status_id: app.current_status_id || app.status_id,
+      current_status_id: app.current_status_id || app.status_id,
+      applied_at: app.applied_date || app.applied_at,
+      applied_date: app.applied_date || app.applied_at,
+      job_url: app.job_link || app.job_url,
+      job_link: app.job_link || app.job_url,
+      histories: app.application_histories || app.histories || [],
+      application_histories: app.application_histories || app.histories || [],
+    }
+  }
+
   const userApplications = computed(() => {
     const authStore = useAuthStore()
     const currentUserId = authStore.user?.id
@@ -34,7 +49,7 @@ export const useJobStore = defineStore('job', () => {
     }
 
     if (selectedStatus.value) {
-      result = result.filter(app => String(app.status_id) === String(selectedStatus.value))
+      result = result.filter(app => String(app.status_id || app.current_status_id) === String(selectedStatus.value))
     }
 
     if (selectedPlatform.value) {
@@ -42,8 +57,8 @@ export const useJobStore = defineStore('job', () => {
     }
 
     result.sort((a, b) => {
-      const dateA = new Date(a.applied_date || a.applied_date || 0).getTime()
-      const dateB = new Date(b.applied_date || b.applied_date || 0).getTime()
+      const dateA = new Date(a.applied_date || a.applied_at || 0).getTime()
+      const dateB = new Date(b.applied_date || b.applied_at || 0).getTime()
       return sortBy.value === 'latest' ? dateB - dateA : dateA - dateB
     })
 
@@ -56,7 +71,10 @@ export const useJobStore = defineStore('job', () => {
   const responseRatePercent = computed(() => {
     if (!userApplications.value.length) return 0
     // Responded means status is not initial 'Applied' (1) and not 'Wishlist' (5)
-    const responded = userApplications.value.filter(a => Number(a.status_id) !== 1 && Number(a.status_id) !== 5)
+    const responded = userApplications.value.filter(a => {
+      const sId = Number(a.current_status_id || a.status_id)
+      return sId !== 1 && sId !== 5
+    })
     return Math.round((responded.length / userApplications.value.length) * 100)
   })
 
@@ -66,7 +84,7 @@ export const useJobStore = defineStore('job', () => {
     refStore.statuses.forEach(s => { counts[s.id] = 0 })
 
     userApplications.value.forEach(app => {
-      const sId = app.status_id
+      const sId = app.current_status_id || app.status_id
       if (sId) counts[sId] = (counts[sId] || 0) + 1
     })
 
@@ -101,12 +119,13 @@ export const useJobStore = defineStore('job', () => {
 
     try {
       const data = await jobService.getApplications(currentUserId ? { user_id: currentUserId } : {})
-      const apiList = Array.isArray(data) ? data : (data.data || data)
-      if (apiList) {
+      const apiList = Array.isArray(data) ? data : (data.data ? (Array.isArray(data.data) ? data.data : data.data.data) : [])
+      if (Array.isArray(apiList)) {
+        const normalized = apiList.map(normalizeApplication)
         if (currentUserId) {
-          applications.value = apiList.filter(app => !app.user_id || String(app.user_id) === String(currentUserId))
+          applications.value = normalized.filter(app => !app.user_id || String(app.user_id) === String(currentUserId))
         } else {
-          applications.value = apiList
+          applications.value = normalized
         }
       } else {
         applications.value = []
@@ -122,40 +141,29 @@ export const useJobStore = defineStore('job', () => {
   async function addApplication(payload) {
     loading.value = true
     error.value = null
-    const refStore = useReferenceStore()
-    const authStore = useAuthStore()
-    const currentUserId = authStore.user?.id
+
+    const dateVal = payload.applied_date || payload.applied_at || new Date().toISOString().split('T')[0]
+    const urlVal = (payload.job_link || payload.job_url) ? (payload.job_link || payload.job_url) : null
+    const notesVal = payload.notes ? payload.notes : null
 
     const finalPayload = {
-      ...payload,
-      ...(currentUserId ? { user_id: currentUserId } : {}),
+      company_name: payload.company_name,
+      position: payload.position,
+      platform_id: Number(payload.platform_id),
+      current_status_id: Number(payload.current_status_id || payload.status_id),
+      applied_date: dateVal,
+      job_link: urlVal,
+      notes: notesVal,
     }
-
-    const foundStatus = refStore.statuses.find(s => String(s.id) === String(payload.status_id)) || { id: payload.status_id, name: 'Status', color: '#325E6A' }
-    const foundPlatform = refStore.platforms.find(p => String(p.id) === String(payload.platform_id)) || { id: payload.platform_id, name: 'Platform' }
 
     try {
       const res = await jobService.createApplication(finalPayload)
-      const newApp = res.data || res
-      applications.value.unshift(newApp)
-      return newApp
+      await fetchApplications()
+      return res.data || res
     } catch (err) {
-      const newApp = {
-        id: Date.now(),
-        ...finalPayload,
-        status: foundStatus,
-        platform: foundPlatform,
-        histories: [
-          {
-            id: Date.now(),
-            status: foundStatus,
-            created_at: payload.applied_date || payload.applied_date || new Date().toISOString().split('T')[0],
-            notes: payload.notes || 'Catatan awal lamaran'
-          }
-        ]
-      }
-      applications.value.unshift(newApp)
-      return newApp
+      error.value = err?.response?.data?.message || 'Gagal menyimpan data lamaran ke database'
+      await fetchApplications().catch(() => {})
+      throw err
     } finally {
       loading.value = false
     }
@@ -164,31 +172,29 @@ export const useJobStore = defineStore('job', () => {
   async function updateApplication(id, payload) {
     loading.value = true
     error.value = null
-    const refStore = useReferenceStore()
-    const foundStatus = refStore.statuses.find(s => String(s.id) === String(payload.status_id))
-    const foundPlatform = refStore.platforms.find(p => String(p.id) === String(payload.platform_id))
+
+    const dateVal = payload.applied_date || payload.applied_at
+    const urlVal = (payload.job_link || payload.job_url) ? (payload.job_link || payload.job_url) : null
+    const notesVal = payload.notes ? payload.notes : null
+
+    const finalPayload = {
+      company_name: payload.company_name,
+      position: payload.position,
+      platform_id: Number(payload.platform_id),
+      current_status_id: Number(payload.current_status_id || payload.status_id),
+      ...(dateVal ? { applied_date: dateVal } : {}),
+      job_link: urlVal,
+      notes: notesVal,
+    }
 
     try {
-      const res = await jobService.updateApplication(id, payload)
-      const updated = res.data || res
-      const idx = applications.value.findIndex(a => String(a.id) === String(id))
-      if (idx !== -1) {
-        applications.value[idx] = { ...applications.value[idx], ...updated }
-      }
-      return updated
+      const res = await jobService.updateApplication(id, finalPayload)
+      await fetchApplications()
+      return res.data || res
     } catch (err) {
-      const idx = applications.value.findIndex(a => String(a.id) === String(id))
-      if (idx !== -1) {
-        const existing = applications.value[idx]
-        const updated = {
-          ...existing,
-          ...payload,
-          status: foundStatus || existing.status,
-          platform: foundPlatform || existing.platform,
-        }
-        applications.value[idx] = updated
-        return updated
-      }
+      error.value = err?.response?.data?.message || 'Gagal memperbarui data lamaran'
+      await fetchApplications().catch(() => {})
+      throw err
     } finally {
       loading.value = false
     }
@@ -199,10 +205,11 @@ export const useJobStore = defineStore('job', () => {
     error.value = null
     try {
       await jobService.deleteApplication(id)
+      await fetchApplications()
     } catch (err) {
-      // Local fallback
+      error.value = err?.response?.data?.message || 'Gagal menghapus lamaran'
+      await fetchApplications().catch(() => {})
     } finally {
-      applications.value = applications.value.filter(a => String(a.id) !== String(id))
       loading.value = false
     }
   }
@@ -210,32 +217,18 @@ export const useJobStore = defineStore('job', () => {
   async function addStatusHistory(applicationId, payload) {
     loading.value = true
     error.value = null
-    const refStore = useReferenceStore()
-    const foundStatus = refStore.statuses.find(s => String(s.id) === String(payload.status_id)) || { id: payload.status_id, name: 'Status Baru', color: '#44A1A4' }
-
+    const historyPayload = {
+      status_id: Number(payload.status_id),
+      change_at: payload.change_at || payload.created_at || new Date().toISOString().split('T')[0],
+      notes: payload.notes ? payload.notes : null,
+    }
     try {
-      await jobService.addStatusHistory(applicationId, payload)
+      await jobService.addStatusHistory(applicationId, historyPayload)
+      await fetchApplications()
     } catch (err) {
-      // Local fallback
+      error.value = err?.response?.data?.message || 'Gagal menambahkan riwayat status'
+      await fetchApplications().catch(() => {})
     } finally {
-      const idx = applications.value.findIndex(a => String(a.id) === String(applicationId))
-      if (idx !== -1) {
-        const app = applications.value[idx]
-        const newHistoryItem = {
-          id: Date.now(),
-          status_id: payload.status_id,
-          status: foundStatus,
-          created_at: payload.created_at || new Date().toISOString().split('T')[0],
-          notes: payload.notes || '',
-        }
-        const updatedHistories = [newHistoryItem, ...(app.histories || [])]
-        applications.value[idx] = {
-          ...app,
-          status_id: payload.status_id,
-          status: foundStatus,
-          histories: updatedHistories,
-        }
-      }
       loading.value = false
     }
   }

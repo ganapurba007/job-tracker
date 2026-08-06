@@ -44,7 +44,7 @@ watch(
         position.value = props.application.position || ''
         platformId.value = props.application.platform_id || ''
         statusId.value = props.application.status_id || ''
-        appliedAt.value = props.application.applied_date || new Date().toISOString().split('T')[0]
+        appliedAt.value = props.application.applied_date || props.application.applied_at || new Date().toISOString().split('T')[0]
         jobUrl.value = props.application.job_url || ''
         notes.value = props.application.notes || ''
       } else {
@@ -88,27 +88,41 @@ function validateForm() {
 async function handleSubmit() {
   if (!validateForm()) return
 
+  const urlVal = jobUrl.value.trim() ? jobUrl.value.trim() : null
+  const notesVal = notes.value.trim() ? notes.value.trim() : null
+
   const payload = {
     company_name: companyName.value.trim(),
     position: position.value.trim(),
     platform_id: Number(platformId.value),
     status_id: Number(statusId.value),
+    current_status_id: Number(statusId.value),
     applied_date: appliedAt.value,
-    job_url: jobUrl.value.trim(),
-    notes: notes.value.trim(),
+    applied_at: appliedAt.value,
+    job_link: urlVal,
+    job_url: urlVal,
+    notes: notesVal,
   }
 
-  if (props.application && props.application.id) {
-    await jobStore.updateApplication(props.application.id, payload)
-    toastStore.showToast('Data lamaran berhasil diperbarui!', 'success')
-  } else {
-    await jobStore.addApplication(payload)
-    toastStore.showToast('Lamaran baru berhasil ditambahkan!', 'success')
+  try {
+    if (props.application && props.application.id) {
+      await jobStore.updateApplication(props.application.id, payload)
+      toastStore.showToast('Data lamaran berhasil diperbarui!', 'success')
+    } else {
+      await jobStore.addApplication(payload)
+      toastStore.showToast('Lamaran baru berhasil ditambahkan!', 'success')
+    }
+    emit('saved')
+    emit('close')
+  } catch (err) {
+    const errorMsg = err?.response?.data?.message || 'Gagal menyimpan data lamaran'
+    toastStore.showToast(errorMsg, 'error')
+    if (err?.response?.data?.errors) {
+      inlineErrors.value = err.response.data.errors
+    }
   }
-
-  emit('saved')
-  emit('close')
 }
+
 function ucfirst(str) {
   if (!str) return ''
   return str.charAt(0).toUpperCase() + str.slice(1)

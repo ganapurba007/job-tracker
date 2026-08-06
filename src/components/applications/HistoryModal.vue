@@ -57,16 +57,19 @@ function validateForm() {
 async function handleSubmit() {
   if (!validateForm() || !props.applicationId) return
 
+  const notesVal = notes.value.trim() ? notes.value.trim() : null
   await jobStore.addStatusHistory(props.applicationId, {
     status_id: Number(statusId.value),
+    change_at: createdAt.value,
     created_at: createdAt.value,
-    notes: notes.value.trim(),
+    notes: notesVal,
   })
 
   toastStore.showToast('Riwayat status berhasil diperbarui!', 'success')
   emit('saved')
   emit('close')
 }
+
 function ucfirst(str) {
   if (!str) return ''
   return str.charAt(0).toUpperCase() + str.slice(1)
