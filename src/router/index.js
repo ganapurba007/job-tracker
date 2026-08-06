@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/authStore'
 import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 import DashboardView from '@/views/DashboardView.vue'
+import JobListView from '@/views/JobListView.vue'
 
 const routes = [
   {
@@ -30,7 +31,7 @@ const routes = [
   {
     path: '/job-applications',
     name: 'job-applications',
-    component: DashboardView, // Will be replaced by JobListView in M3
+    component: JobListView,
     meta: { requiresAuth: true },
   },
   {
