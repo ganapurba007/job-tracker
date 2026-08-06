@@ -4,6 +4,7 @@ import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import JobListView from '@/views/JobListView.vue'
+import JobDetailView from '@/views/JobDetailView.vue'
 
 const routes = [
   {
@@ -32,6 +33,12 @@ const routes = [
     path: '/job-applications',
     name: 'job-applications',
     component: JobListView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/job-applications/:id',
+    name: 'job-detail',
+    component: JobDetailView,
     meta: { requiresAuth: true },
   },
   {

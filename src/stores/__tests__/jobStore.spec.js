@@ -9,6 +9,7 @@ vi.mock('@/services/jobService', () => ({
     createApplication: vi.fn(),
     updateApplication: vi.fn(),
     deleteApplication: vi.fn(),
+    addStatusHistory: vi.fn(),
   },
 }))
 
@@ -88,5 +89,19 @@ describe('jobStore', () => {
 
     expect(store.applications.length).toBe(initialCount - 1)
     expect(store.applications.find((a) => a.id === targetId)).toBeUndefined()
+  })
+
+  it('adds status history and updates current status', async () => {
+    const store = useJobStore()
+    const target = store.applications[0]
+
+    await store.addStatusHistory(target.id, {
+      status_id: 3,
+      created_at: '2026-08-06',
+      notes: 'Received offer!',
+    })
+
+    expect(store.applications[0].status_id).toBe(3)
+    expect(store.applications[0].histories[0].notes).toBe('Received offer!')
   })
 })

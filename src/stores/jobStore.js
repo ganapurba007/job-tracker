@@ -204,6 +204,39 @@ export const useJobStore = defineStore('job', () => {
     }
   }
 
+  async function addStatusHistory(applicationId, payload) {
+    loading.value = true
+    error.value = null
+    const refStore = useReferenceStore()
+    const foundStatus = refStore.statuses.find(s => String(s.id) === String(payload.status_id)) || { id: payload.status_id, name: 'Status Baru', color: '#44A1A4' }
+
+    try {
+      await jobService.addStatusHistory(applicationId, payload)
+    } catch (err) {
+      // Local fallback
+    } finally {
+      const idx = applications.value.findIndex(a => String(a.id) === String(applicationId))
+      if (idx !== -1) {
+        const app = applications.value[idx]
+        const newHistoryItem = {
+          id: Date.now(),
+          status_id: payload.status_id,
+          status: foundStatus,
+          created_at: payload.created_at || new Date().toISOString().split('T')[0],
+          notes: payload.notes || '',
+        }
+        const updatedHistories = [newHistoryItem, ...(app.histories || [])]
+        applications.value[idx] = {
+          ...app,
+          status_id: payload.status_id,
+          status: foundStatus,
+          histories: updatedHistories,
+        }
+      }
+      loading.value = false
+    }
+  }
+
   function setSearchQuery(query) {
     searchQuery.value = query
   }
@@ -240,6 +273,7 @@ export const useJobStore = defineStore('job', () => {
     addApplication,
     updateApplication,
     deleteApplication,
+    addStatusHistory,
     setSearchQuery,
     setFilterStatus,
     setFilterPlatform,
