@@ -9,7 +9,7 @@ import Timeline from '@/components/applications/Timeline.vue'
 import JobFormModal from '@/components/applications/JobFormModal.vue'
 import HistoryModal from '@/components/applications/HistoryModal.vue'
 import ConfirmDeleteModal from '@/components/applications/ConfirmDeleteModal.vue'
-import { ArrowLeft, Building2, Calendar, Globe, ExternalLink, Pencil, Trash2, Plus, FileText } from '@lucide/vue'
+import { ArrowLeft, Building2, Calendar, Globe, ExternalLink, Pencil, Trash2, Plus, FileText, Loader2 } from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -23,7 +23,12 @@ const showDeleteModal = ref(false)
 const applicationId = computed(() => route.params.id)
 
 const application = computed(() => {
-  return jobStore.applications.find(a => String(a.id) === String(applicationId.value))
+  const found = jobStore.applications.find(a => String(a.id) === String(applicationId.value))
+  if (found && found.histories && found.histories.length > 0) return found
+  if (jobStore.currentApplication && String(jobStore.currentApplication.id) === String(applicationId.value)) {
+    return jobStore.currentApplication
+  }
+  return found || jobStore.currentApplication
 })
 
 const formatDate = computed(() => {
@@ -52,11 +57,9 @@ async function loadDetailData() {
 }
 
 onMounted(async () => {
-  await Promise.all([
-    refStore.fetchReferences(),
-    jobStore.fetchApplications(),
-  ])
+  await refStore.fetchReferences()
   await loadDetailData()
+  jobStore.fetchApplications().catch(() => {})
 })
 
 watch(applicationId, async (newId) => {
@@ -79,8 +82,19 @@ watch(applicationId, async (newId) => {
       </router-link>
     </div>
 
+    <!-- Loading State -->
+    <div
+      v-if="jobStore.loading && !application"
+      class="p-12 text-center bg-white dark:bg-primary-dark/80 rounded-2xl border border-gray-100 dark:border-primary shadow-xs space-y-3"
+    >
+      <Loader2 class="w-8 h-8 mx-auto text-accent-teal animate-spin" />
+      <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">
+        Memuat detail data lamaran...
+      </p>
+    </div>
+
     <!-- Application Found View -->
-    <template v-if="application">
+    <template v-else-if="application">
       <!-- Main Application Banner Header -->
       <div class="bg-white dark:bg-primary-dark/90 rounded-2xl border border-gray-100 dark:border-primary p-6 shadow-sm space-y-6">
         <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">

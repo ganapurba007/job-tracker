@@ -58,16 +58,24 @@ async function handleSubmit() {
   if (!validateForm() || !props.applicationId) return
 
   const notesVal = notes.value.trim() ? notes.value.trim() : null
-  await jobStore.addStatusHistory(props.applicationId, {
-    status_id: Number(statusId.value),
-    change_at: createdAt.value,
-    created_at: createdAt.value,
-    notes: notesVal,
-  })
+  try {
+    await jobStore.addStatusHistory(props.applicationId, {
+      status_id: Number(statusId.value),
+      change_at: createdAt.value,
+      created_at: createdAt.value,
+      notes: notesVal,
+    })
 
-  toastStore.showToast('Riwayat status berhasil diperbarui!', 'success')
-  emit('saved')
-  emit('close')
+    toastStore.showToast('Riwayat status berhasil diperbarui!', 'success')
+    emit('saved')
+    emit('close')
+  } catch (err) {
+    const errorMsg = err?.response?.data?.message || 'Gagal menambahkan riwayat status'
+    toastStore.showToast(errorMsg, 'error')
+    if (err?.response?.data?.errors) {
+      inlineErrors.value = err.response.data.errors
+    }
+  }
 }
 
 function ucfirst(str) {

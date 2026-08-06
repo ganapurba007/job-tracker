@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/authStore'
 
 export const useJobStore = defineStore('job', () => {
   const applications = ref([])
+  const currentApplication = ref(null)
   const loading = ref(false)
   const error = ref(null)
 
@@ -15,8 +16,14 @@ export const useJobStore = defineStore('job', () => {
   const selectedPlatform = ref('')
   const sortBy = ref('latest')
 
-  function normalizeApplication(app) {
+  function normalizeApplication(app, existingApp = null) {
     if (!app) return app
+    const histories = (app.application_histories && app.application_histories.length > 0)
+      ? app.application_histories
+      : ((app.histories && app.histories.length > 0)
+          ? app.histories
+          : (existingApp ? (existingApp.application_histories || existingApp.histories || []) : []))
+
     return {
       ...app,
       status_id: app.current_status_id || app.status_id,
@@ -25,8 +32,8 @@ export const useJobStore = defineStore('job', () => {
       applied_date: app.applied_date || app.applied_at,
       job_url: app.job_link || app.job_url,
       job_link: app.job_link || app.job_url,
-      histories: app.application_histories || app.histories || [],
-      application_histories: app.application_histories || app.histories || [],
+      histories: histories,
+      application_histories: histories,
     }
   }
 
@@ -134,7 +141,12 @@ export const useJobStore = defineStore('job', () => {
       const data = await jobService.getApplications(currentUserId ? { user_id: currentUserId } : {})
       const apiList = Array.isArray(data) ? data : (data.data ? (Array.isArray(data.data) ? data.data : data.data.data) : [])
       if (Array.isArray(apiList)) {
-        const normalized = apiList.map(normalizeApplication)
+        const existingMap = new Map(applications.value.map(a => [String(a.id), a]))
+        const normalized = apiList.map(item => {
+          const existing = existingMap.get(String(item.id))
+          return normalizeApplication(item, existing)
+        })
+
         if (currentUserId) {
           applications.value = normalized.filter(app => !app.user_id || String(app.user_id) === String(currentUserId))
         } else {
@@ -158,6 +170,8 @@ export const useJobStore = defineStore('job', () => {
       const data = await jobService.getApplication(id)
       const app = data.data || data
       const normalized = normalizeApplication(app)
+      currentApplication.value = normalized
+
       const idx = applications.value.findIndex(a => String(a.id) === String(id))
       if (idx !== -1) {
         applications.value[idx] = normalized
@@ -260,11 +274,12 @@ export const useJobStore = defineStore('job', () => {
     }
     try {
       await jobService.addStatusHistory(applicationId, historyPayload)
-      await fetchApplication(applicationId)
       await fetchApplications()
+      await fetchApplication(applicationId)
     } catch (err) {
       error.value = err?.response?.data?.message || 'Gagal menambahkan riwayat status'
       await fetchApplications().catch(() => {})
+      throw err
     } finally {
       loading.value = false
     }
@@ -295,6 +310,7 @@ export const useJobStore = defineStore('job', () => {
 
   return {
     applications,
+    currentApplication,
     loading,
     error,
     searchQuery,
