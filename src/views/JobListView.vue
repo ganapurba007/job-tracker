@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useJobStore } from '@/stores/jobStore'
 import { useReferenceStore } from '@/stores/referenceStore'
+import { useToastStore } from '@/stores/toastStore'
 import FilterBar from '@/components/applications/FilterBar.vue'
 import JobCard from '@/components/applications/JobCard.vue'
 import JobFormModal from '@/components/applications/JobFormModal.vue'
@@ -9,10 +10,12 @@ import ConfirmDeleteModal from '@/components/applications/ConfirmDeleteModal.vue
 import Skeleton from '@/components/common/Skeleton.vue'
 import Button from '@/components/common/Button.vue'
 import Pagination from '@/components/common/Pagination.vue'
-import { Briefcase, Plus, FolderOpen } from '@lucide/vue'
+import { exportToCSV, printReport } from '@/utils/exportUtils'
+import { Briefcase, Plus, FolderOpen, Download, Printer } from '@lucide/vue'
 
 const jobStore = useJobStore()
 const refStore = useReferenceStore()
+const toastStore = useToastStore()
 
 const showFormModal = ref(false)
 const showDeleteModal = ref(false)
@@ -33,6 +36,27 @@ function openDeleteModal(app) {
   showDeleteModal.value = true
 }
 
+function handleExportCSV() {
+  const data = jobStore.filteredApplications
+  if (!data.length) {
+    toastStore.showToast('Tidak ada data lamaran untuk diekspor', 'error')
+    return
+  }
+  const success = exportToCSV(data, `daftar-lamaran-${new Date().toISOString().split('T')[0]}.csv`)
+  if (success) {
+    toastStore.showToast(`Berhasil mengekspor ${data.length} data ke CSV!`, 'success')
+  }
+}
+
+function handlePrintPDF() {
+  const data = jobStore.filteredApplications
+  if (!data.length) {
+    toastStore.showToast('Tidak ada data lamaran untuk dicetak', 'error')
+    return
+  }
+  printReport(data)
+}
+
 onMounted(async () => {
   await Promise.all([
     refStore.fetchReferences(),
@@ -44,7 +68,7 @@ onMounted(async () => {
 <template>
   <div class="space-y-6">
     <!-- Top Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
         <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
           <Briefcase class="w-7 h-7 text-teal-600 dark:text-teal-400" />
@@ -55,10 +79,35 @@ onMounted(async () => {
         </p>
       </div>
 
-      <Button variant="orange" @click="openCreateModal">
-        <Plus class="w-4 h-4 mr-2" />
-        Tambah Lamaran
-      </Button>
+      <!-- Action Buttons Bar -->
+      <div class="flex items-center space-x-2 shrink-0 flex-wrap gap-y-2">
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          @click="handleExportCSV"
+          title="Ekspor daftar lamaran ke berkas CSV (Excel)"
+        >
+          <Download class="w-4 h-4 mr-1.5 text-teal-600 dark:text-teal-400" />
+          <span>Export CSV</span>
+        </Button>
+
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          @click="handlePrintPDF"
+          title="Cetak atau unduh laporan PDF rekapitulasi lamaran"
+        >
+          <Printer class="w-4 h-4 mr-1.5 text-slate-600 dark:text-slate-300" />
+          <span>Cetak / PDF</span>
+        </Button>
+
+        <Button variant="orange" @click="openCreateModal">
+          <Plus class="w-4 h-4 mr-2" />
+          Tambah Lamaran
+        </Button>
+      </div>
     </div>
 
     <!-- Filter Control Bar -->
