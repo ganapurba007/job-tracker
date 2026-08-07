@@ -28,16 +28,16 @@ onMounted(async () => {
 <template>
   <div class="space-y-6">
     <!-- Welcome Header Banner -->
-    <div class="p-6 rounded-2xl bg-gradient-to-r from-primary to-primary-dark text-white shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-teal-500/30">
       <div class="space-y-2">
-        <div class="flex items-center space-x-2 text-accent-teal text-xs font-semibold uppercase tracking-wider">
-          <Sparkles class="w-4 h-4 text-accent-orange" />
+        <div class="flex items-center space-x-2 text-teal-400 text-xs font-bold uppercase tracking-wider">
+          <Sparkles class="w-4 h-4 text-orange-400" />
           <span>Dashboard Analytics</span>
         </div>
-        <h1 class="text-2xl sm:text-3xl font-extrabold">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-white">
           Selamat Datang, {{ authStore.user?.name || 'Pengguna' }}!
         </h1>
-        <p class="text-gray-300 text-xs sm:text-sm max-w-xl">
+        <p class="text-slate-300 text-xs sm:text-sm max-w-xl">
           Pantau ringkasan statistik lamaran kerja Anda secara real-time dan analisis efektivitas pencarian kerja Anda.
         </p>
       </div>
@@ -64,12 +64,12 @@ onMounted(async () => {
         badge-text="KPI Utama"
       />
 
-      <div class="p-5 rounded-2xl bg-white dark:bg-primary-dark/90 border border-gray-100 dark:border-primary/80 shadow-xs flex flex-col justify-between space-y-3">
+      <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col justify-between space-y-3">
         <div>
-          <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Tindakan Cepat
           </span>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Catat lowongan baru yang Anda lamar hari ini.
           </p>
         </div>
@@ -89,14 +89,14 @@ onMounted(async () => {
     <!-- Recent Applications Preview Section -->
     <div class="space-y-4 pt-2">
       <div class="flex items-center justify-between">
-        <h2 class="text-lg font-bold text-primary-dark dark:text-gray-100 flex items-center gap-2">
-          <Briefcase class="w-5 h-5 text-accent-teal" />
+        <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <Briefcase class="w-5 h-5 text-teal-600 dark:text-teal-400" />
           <span>Lamaran Terbaru</span>
         </h2>
 
         <router-link
           to="/job-applications"
-          class="inline-flex items-center text-xs font-semibold text-accent-teal hover:text-accent-orange transition-colors"
+          class="inline-flex items-center text-xs font-bold text-teal-600 dark:text-teal-400 hover:text-orange-500 transition-colors"
         >
           <span>Lihat Semua ({{ jobStore.applications.length }})</span>
           <ArrowRight class="w-4 h-4 ml-1" />

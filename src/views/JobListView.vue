@@ -45,11 +45,11 @@ onMounted(async () => {
     <!-- Top Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-primary-dark dark:text-gray-100 flex items-center gap-2">
-          <Briefcase class="w-7 h-7 text-accent-teal" />
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <Briefcase class="w-7 h-7 text-teal-600 dark:text-teal-400" />
           <span>Daftar Lamaran Kerja</span>
         </h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
           Pantau dan kelola {{ jobStore.filteredApplications.length }} lamaran pekerjaan aktif Anda
         </p>
       </div>
@@ -83,16 +83,16 @@ onMounted(async () => {
     <!-- Empty State -->
     <div
       v-else
-      class="py-16 px-4 text-center bg-white dark:bg-primary-dark/60 rounded-2xl border border-gray-100 dark:border-primary/60 shadow-xs space-y-4 max-w-md mx-auto"
+      class="py-16 px-4 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4 max-w-md mx-auto"
     >
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-accent-teal/10 dark:bg-accent-teal/20 text-accent-teal">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-teal-500/10 text-teal-600 dark:text-teal-400">
         <FolderOpen class="w-8 h-8" />
       </div>
       <div class="space-y-1">
-        <h3 class="text-lg font-bold text-primary-dark dark:text-gray-100">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">
           Tidak Ada Data Lamaran
         </h3>
-        <p class="text-xs text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
+        <p class="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
           <template v-if="jobStore.searchQuery || jobStore.selectedStatus || jobStore.selectedPlatform">
             Tidak ditemukan lamaran yang cocok dengan kriteria pencarian Anda.
           </template>
@@ -107,7 +107,7 @@ onMounted(async () => {
           v-if="jobStore.searchQuery || jobStore.selectedStatus || jobStore.selectedPlatform"
           type="button"
           @click="jobStore.resetFilters()"
-          class="text-xs font-semibold text-accent-teal hover:underline cursor-pointer"
+          class="text-xs font-bold text-teal-600 dark:text-teal-400 hover:underline cursor-pointer"
         >
           Reset Semua Filter
         </button>

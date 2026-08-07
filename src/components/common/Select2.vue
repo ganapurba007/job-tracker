@@ -134,18 +134,18 @@ onUnmounted(() => {
       :disabled="disabled"
       @click="toggleDropdown"
       :class="[
-        'w-full flex items-center justify-between pl-3 pr-3 py-2 rounded-xl border bg-white dark:bg-primary text-left text-sm transition-all duration-200 min-h-[40px]',
-        disabled ? 'opacity-60 cursor-not-allowed bg-gray-50 dark:bg-primary/40' : 'cursor-pointer',
+        'w-full flex items-center justify-between pl-3 pr-3 py-2 rounded-xl border bg-white dark:bg-slate-900 text-left text-sm transition-all duration-200 min-h-[40px]',
+        disabled ? 'opacity-60 cursor-not-allowed bg-slate-100 dark:bg-slate-800/50' : 'cursor-pointer',
         error
           ? 'border-red-500 focus:ring-2 focus:ring-red-400'
           : isOpen
-            ? 'border-accent-teal ring-2 ring-accent-teal/20 shadow-sm'
-            : 'border-gray-200 dark:border-primary/60 hover:border-gray-300 dark:hover:border-primary/80',
+            ? 'border-teal-500 ring-2 ring-teal-500/20 shadow-sm'
+            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700',
       ]"
     >
       <div class="flex items-center space-x-2.5 min-w-0 flex-1 pr-2">
         <!-- Optional Left Icon -->
-        <component :is="icon" v-if="icon" class="w-4 h-4 text-gray-400 shrink-0" />
+        <component :is="icon" v-if="icon" class="w-4 h-4 text-slate-400 shrink-0" />
 
         <!-- Status Dot if option has color -->
         <span
@@ -157,22 +157,22 @@ onUnmounted(() => {
         <!-- Selected Label or Placeholder -->
         <span
           v-if="selectedOption"
-          class="font-semibold text-primary-dark dark:text-gray-100 truncate"
+          class="font-semibold text-slate-900 dark:text-slate-100 truncate"
         >
           {{ selectedLabel }}
         </span>
-        <span v-else class="text-gray-400 dark:text-gray-500 truncate">
+        <span v-else class="text-slate-400 dark:text-slate-500 truncate">
           {{ placeholder }}
         </span>
       </div>
 
       <!-- Action Control Icons -->
-      <div class="flex items-center space-x-1 shrink-0 text-gray-400">
+      <div class="flex items-center space-x-1 shrink-0 text-slate-400">
         <button
           v-if="modelValue !== '' && modelValue !== null && modelValue !== undefined && !disabled"
           type="button"
           @click="clearSelection"
-          class="p-0.5 rounded-md hover:bg-gray-100 dark:hover:bg-primary/80 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+          class="p-0.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
           title="Hapus Pilihan"
         >
           <X class="w-3.5 h-3.5" />
@@ -180,7 +180,7 @@ onUnmounted(() => {
         <ChevronDown
           :class="[
             'w-4 h-4 transition-transform duration-200',
-            isOpen ? 'rotate-180 text-accent-teal' : '',
+            isOpen ? 'rotate-180 text-teal-600 dark:text-teal-400' : '',
           ]"
         />
       </div>
@@ -197,17 +197,17 @@ onUnmounted(() => {
     >
       <div
         v-if="isOpen"
-        class="absolute z-50 left-0 right-0 mt-1.5 rounded-2xl bg-white dark:bg-primary-dark border border-gray-200 dark:border-primary shadow-xl overflow-hidden py-1.5 space-y-1"
+        class="absolute z-50 left-0 right-0 mt-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden py-1.5 space-y-1"
       >
         <!-- Select2 Real-Time Search Box -->
-        <div v-if="searchable && options.length > 4" class="px-2 pt-1 pb-1.5 border-b border-gray-100 dark:border-primary/60">
+        <div v-if="searchable && options.length > 4" class="px-2 pt-1 pb-1.5 border-b border-slate-100 dark:border-slate-800">
           <div class="relative">
-            <Search class="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-gray-400 pointer-events-none" />
+            <Search class="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400 pointer-events-none" />
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Cari..."
-              class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-gray-200 dark:border-primary/60 bg-gray-50 dark:bg-primary text-xs text-primary-dark dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-accent-teal"
+              class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-teal-500"
               @click.stop
             />
           </div>
@@ -224,8 +224,8 @@ onUnmounted(() => {
               :class="[
                 'w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-left transition-colors cursor-pointer my-0.5',
                 String(getOptionValue(opt)) === String(modelValue)
-                  ? 'bg-accent-teal/10 text-accent-teal dark:bg-accent-teal/20 font-bold'
-                  : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-primary/80',
+                  ? 'bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold'
+                  : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800',
               ]"
             >
               <div class="flex items-center space-x-2.5 min-w-0 pr-2">
@@ -241,12 +241,12 @@ onUnmounted(() => {
               <!-- Selected Checkmark Icon -->
               <Check
                 v-if="String(getOptionValue(opt)) === String(modelValue)"
-                class="w-4 h-4 text-accent-teal shrink-0"
+                class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0"
               />
             </button>
           </template>
 
-          <div v-else class="px-3 py-3 text-center text-xs text-gray-400 font-medium">
+          <div v-else class="px-3 py-3 text-center text-xs text-slate-400 font-medium">
             Tidak ada pilihan yang cocok
           </div>
         </div>

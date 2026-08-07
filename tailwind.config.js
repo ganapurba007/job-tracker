@@ -8,10 +8,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        'primary-dark': '#224248',
-        'primary': '#325E6A',
-        'accent-teal': '#44A1A4',
-        'accent-orange': '#FF9A00',
+        'primary-dark': '#0F172A',
+        'primary': '#1E293B',
+        'accent-teal': '#0D9488',
+        'accent-orange': '#EA580C',
       },
     },
   },

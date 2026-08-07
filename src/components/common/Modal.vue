@@ -58,7 +58,7 @@ watch(
     >
       <div
         v-if="show"
-        class="fixed inset-0 z-50 overflow-y-auto p-4 sm:p-6 flex items-center justify-center bg-primary-dark/60 dark:bg-black/70 backdrop-blur-xs"
+        class="fixed inset-0 z-50 overflow-y-auto p-4 sm:p-6 flex items-center justify-center bg-slate-900/60 dark:bg-black/80 backdrop-blur-xs"
         @click.self="emit('close')"
       >
         <Transition
@@ -72,7 +72,7 @@ watch(
           <div
             v-if="show"
             :class="[
-              'w-full bg-white dark:bg-primary-dark rounded-2xl shadow-2xl border border-gray-100 dark:border-primary p-6 space-y-4 my-8 overflow-hidden transform text-left align-middle transition-all',
+              'w-full bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 my-8 overflow-hidden transform text-left align-middle transition-all',
               maxWidth === 'sm' ? 'max-w-sm' : '',
               maxWidth === 'md' ? 'max-w-md' : '',
               maxWidth === 'lg' ? 'max-w-lg' : '',
@@ -81,14 +81,14 @@ watch(
             ]"
           >
             <!-- Header -->
-            <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-primary/60">
-              <h3 class="text-lg font-bold text-primary-dark dark:text-gray-100">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">
                 {{ title }}
               </h3>
               <button
                 type="button"
                 @click="emit('close')"
-                class="p-1.5 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-primary/60 transition-colors cursor-pointer"
+                class="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 aria-label="Tutup modal"
               >
                 <X class="w-5 h-5" />
