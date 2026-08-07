@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import Badge from '@/components/common/Badge.vue'
-import { Building2, Calendar, Globe, ChevronRight, Pencil, Trash2 } from '@lucide/vue'
+import { Building2, Calendar, Globe, ChevronRight, Pencil, Trash2, Bell, Paperclip } from '@lucide/vue'
 
 const props = defineProps({
   application: {
@@ -24,6 +24,20 @@ const formatDate = computed(() => {
     }).format(d)
   } catch (e) {
     return dateVal
+  }
+})
+
+const formatFollowUpDate = computed(() => {
+  if (!props.application.follow_up_date) return null
+  try {
+    const d = new Date(props.application.follow_up_date)
+    return new Intl.DateTimeFormat('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(d)
+  } catch (e) {
+    return props.application.follow_up_date
   }
 })
 </script>
@@ -56,12 +70,33 @@ const formatDate = computed(() => {
         {{ application.notes }}
       </p>
 
-      <!-- Platform tag -->
-      <div class="flex items-center space-x-2 pt-1">
+      <!-- Platform & Follow-up Date & Attachment Tags -->
+      <div class="flex flex-wrap items-center gap-1.5 pt-1">
         <span class="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
           <Globe class="w-3 h-3 mr-1 text-teal-600 dark:text-teal-400" />
           {{ application.platform?.label || application.platform?.name || 'Platform' }}
         </span>
+
+        <span
+          v-if="application.follow_up_date"
+          class="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/30"
+          :title="`Jadwal Wawancara / Follow-up: ${formatFollowUpDate}`"
+        >
+          <Bell class="w-3 h-3 mr-1 text-orange-500 animate-pulse" />
+          <span>{{ formatFollowUpDate }}</span>
+        </span>
+
+        <a
+          v-if="application.attachment_url"
+          :href="application.attachment_url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/30 hover:bg-teal-500/20 transition-colors"
+          title="Buka Berkas CV / Portofolio"
+        >
+          <Paperclip class="w-3 h-3 mr-1" />
+          <span>CV / Berkas</span>
+        </a>
       </div>
     </div>
 

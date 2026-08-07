@@ -34,6 +34,8 @@ export const useJobStore = defineStore('job', () => {
       applied_date: app.applied_date || app.applied_at,
       job_url: app.job_link || app.job_url,
       job_link: app.job_link || app.job_url,
+      follow_up_date: app.follow_up_date || null,
+      attachment_url: app.attachment_url || app.attachment_link || null,
       histories: histories,
       application_histories: histories,
     }
@@ -88,6 +90,14 @@ export const useJobStore = defineStore('job', () => {
   // Watch filters and reset to page 1 automatically when filter/search changes
   watch([searchQuery, selectedStatus, selectedPlatform, sortBy], () => {
     currentPage.value = 1
+  })
+
+  // Upcoming Reminders Getter
+  const upcomingReminders = computed(() => {
+    return userApplications.value
+      .filter(a => a.follow_up_date)
+      .sort((a, b) => new Date(a.follow_up_date).getTime() - new Date(b.follow_up_date).getTime())
+      .slice(0, 5)
   })
 
   // Analytics KPI Getters (scoped to logged in user)
@@ -220,6 +230,8 @@ export const useJobStore = defineStore('job', () => {
 
     const dateVal = payload.applied_date || payload.applied_at || new Date().toISOString().split('T')[0]
     const urlVal = (payload.job_link || payload.job_url) ? (payload.job_link || payload.job_url) : null
+    const followUpVal = payload.follow_up_date ? payload.follow_up_date : null
+    const attachmentVal = payload.attachment_url ? payload.attachment_url : null
     const notesVal = payload.notes ? payload.notes : null
 
     const finalPayload = {
@@ -229,6 +241,8 @@ export const useJobStore = defineStore('job', () => {
       current_status_id: Number(payload.current_status_id || payload.status_id),
       applied_date: dateVal,
       job_link: urlVal,
+      follow_up_date: followUpVal,
+      attachment_url: attachmentVal,
       notes: notesVal,
     }
 
@@ -251,6 +265,8 @@ export const useJobStore = defineStore('job', () => {
 
     const dateVal = payload.applied_date || payload.applied_at
     const urlVal = (payload.job_link || payload.job_url) ? (payload.job_link || payload.job_url) : null
+    const followUpVal = payload.follow_up_date !== undefined ? payload.follow_up_date : null
+    const attachmentVal = payload.attachment_url !== undefined ? payload.attachment_url : null
     const notesVal = payload.notes ? payload.notes : null
 
     const finalPayload = {
@@ -260,6 +276,8 @@ export const useJobStore = defineStore('job', () => {
       current_status_id: Number(payload.current_status_id || payload.status_id),
       ...(dateVal ? { applied_date: dateVal } : {}),
       job_link: urlVal,
+      follow_up_date: followUpVal,
+      attachment_url: attachmentVal,
       notes: notesVal,
     }
 
@@ -361,6 +379,7 @@ export const useJobStore = defineStore('job', () => {
     filteredApplications,
     paginatedApplications,
     totalPages,
+    upcomingReminders,
     totalApplicationsCount,
     responseRatePercent,
     statusBreakdownData,

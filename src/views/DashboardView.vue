@@ -10,7 +10,7 @@ import JobCard from '@/components/applications/JobCard.vue'
 import JobFormModal from '@/components/applications/JobFormModal.vue'
 import ConfirmDeleteModal from '@/components/applications/ConfirmDeleteModal.vue'
 import Button from '@/components/common/Button.vue'
-import { Sparkles, Plus, ArrowRight, Briefcase } from '@lucide/vue'
+import { Sparkles, Plus, ArrowRight, Briefcase, Bell, ChevronRight, Calendar } from '@lucide/vue'
 
 const authStore = useAuthStore()
 const jobStore = useJobStore()
@@ -33,6 +33,20 @@ function openEditModal(app) {
 function openDeleteModal(app) {
   targetApplication.value = app
   showDeleteModal.value = true
+}
+
+function formatReminderDate(dateVal) {
+  if (!dateVal) return '-'
+  try {
+    const d = new Date(dateVal)
+    return new Intl.DateTimeFormat('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(d)
+  } catch (e) {
+    return dateVal
+  }
 }
 
 onMounted(async () => {
@@ -95,6 +109,44 @@ onMounted(async () => {
           <Plus class="w-4 h-4 mr-2" />
           Tambah Lamaran Baru
         </Button>
+      </div>
+    </div>
+
+    <!-- Upcoming Reminders Widget Section -->
+    <div v-if="jobStore.upcomingReminders.length > 0" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <Bell class="w-5 h-5 text-orange-500 animate-pulse" />
+          <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">
+            Jadwal Wawancara & Follow-up Mendatang
+          </h2>
+        </div>
+        <span class="text-xs font-bold text-orange-600 dark:text-orange-400 px-2.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/30">
+          {{ jobStore.upcomingReminders.length }} Pengingat
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <router-link
+          v-for="item in jobStore.upcomingReminders"
+          :key="`reminder-${item.id}`"
+          :to="`/job-applications/${item.id}`"
+          class="p-3.5 rounded-xl border border-orange-500/20 bg-orange-500/5 dark:bg-orange-950/20 hover:border-orange-500/50 transition-all flex items-center justify-between group"
+        >
+          <div class="space-y-1 min-w-0 pr-2">
+            <div class="font-extrabold text-xs text-slate-900 dark:text-slate-100 group-hover:text-orange-500 transition-colors truncate">
+              {{ item.position }}
+            </div>
+            <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">
+              {{ item.company_name }}
+            </div>
+            <div class="flex items-center text-[10px] font-bold text-orange-600 dark:text-orange-400">
+              <Calendar class="w-3 h-3 mr-1" />
+              <span>{{ formatReminderDate(item.follow_up_date) }}</span>
+            </div>
+          </div>
+          <ChevronRight class="w-4 h-4 text-orange-400 group-hover:translate-x-1 transition-transform shrink-0" />
+        </router-link>
       </div>
     </div>
 

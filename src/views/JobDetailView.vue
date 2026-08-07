@@ -22,6 +22,8 @@ import {
   Clock,
   Loader2,
   AlertCircle,
+  Bell,
+  Paperclip,
 } from '@lucide/vue'
 
 const route = useRoute()
@@ -49,6 +51,20 @@ const formatDate = computed(() => {
     }).format(d)
   } catch (e) {
     return dateVal
+  }
+})
+
+const formatFollowUpDate = computed(() => {
+  if (!application.value || !application.value.follow_up_date) return null
+  try {
+    const d = new Date(application.value.follow_up_date)
+    return new Intl.DateTimeFormat('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(d)
+  } catch (e) {
+    return application.value.follow_up_date
   }
 })
 
@@ -152,6 +168,23 @@ onMounted(() => {
           </div>
         </div>
 
+        <!-- Follow-up / Interview Reminder Banner if available -->
+        <div
+          v-if="application.follow_up_date"
+          class="p-4 rounded-xl bg-orange-500/10 dark:bg-orange-500/15 border border-orange-500/30 flex items-center justify-between gap-3 text-xs"
+        >
+          <div class="flex items-center space-x-2.5 text-orange-600 dark:text-orange-400 font-bold">
+            <Bell class="w-5 h-5 shrink-0 animate-pulse" />
+            <div>
+              <div class="text-xs uppercase tracking-wider font-bold">Jadwal Wawancara / Follow-up:</div>
+              <div class="text-sm font-extrabold text-slate-900 dark:text-slate-100">{{ formatFollowUpDate }}</div>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-full bg-orange-500 text-white font-bold text-[10px] uppercase tracking-wider shrink-0">
+            Pengingat Aktif
+          </span>
+        </div>
+
         <!-- Meta info grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs">
           <div class="flex items-center text-slate-600 dark:text-slate-300">
@@ -170,6 +203,20 @@ onMounted(() => {
               class="text-teal-600 dark:text-teal-400 hover:underline font-bold truncate"
             >
               {{ application.job_link || application.job_url }}
+            </a>
+          </div>
+
+          <div v-if="application.attachment_url" class="flex items-center min-w-0 sm:col-span-2">
+            <Paperclip class="w-4 h-4 mr-2 text-teal-600 dark:text-teal-400 shrink-0" />
+            <span class="font-medium text-slate-600 dark:text-slate-300 mr-1 shrink-0">Berkas CV / Portofolio:</span>
+            <a
+              :href="application.attachment_url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-teal-600 dark:text-teal-400 hover:underline font-bold truncate flex items-center"
+            >
+              <span>{{ application.attachment_url }}</span>
+              <ExternalLink class="w-3.5 h-3.5 ml-1" />
             </a>
           </div>
         </div>
