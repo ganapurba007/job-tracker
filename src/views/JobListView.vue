@@ -8,6 +8,7 @@ import JobFormModal from '@/components/applications/JobFormModal.vue'
 import ConfirmDeleteModal from '@/components/applications/ConfirmDeleteModal.vue'
 import Skeleton from '@/components/common/Skeleton.vue'
 import Button from '@/components/common/Button.vue'
+import Pagination from '@/components/common/Pagination.vue'
 import { Briefcase, Plus, FolderOpen } from '@lucide/vue'
 
 const jobStore = useJobStore()
@@ -66,19 +67,28 @@ onMounted(async () => {
     <!-- Loading Skeleton State -->
     <Skeleton v-if="jobStore.loading" :count="6" />
 
-    <!-- Applications Card Grid -->
-    <div
-      v-else-if="jobStore.filteredApplications.length > 0"
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
-    >
-      <JobCard
-        v-for="app in jobStore.filteredApplications"
-        :key="app.id"
-        :application="app"
-        @edit="openEditModal"
-        @delete="openDeleteModal"
+    <!-- Applications Card Grid & Pagination Section -->
+    <template v-else-if="jobStore.filteredApplications.length > 0">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        <JobCard
+          v-for="app in jobStore.paginatedApplications"
+          :key="app.id"
+          :application="app"
+          @edit="openEditModal"
+          @delete="openDeleteModal"
+        />
+      </div>
+
+      <!-- Client-Side Pagination Controls -->
+      <Pagination
+        v-if="jobStore.filteredApplications.length > 0"
+        :current-page="Number(jobStore.currentPage || 1)"
+        :total-pages="Number(jobStore.totalPages || 1)"
+        :total-items="Number(jobStore.filteredApplications.length || 0)"
+        :page-size="Number(jobStore.pageSize || 8)"
+        @page-change="jobStore.setCurrentPage"
       />
-    </div>
+    </template>
 
     <!-- Empty State -->
     <div

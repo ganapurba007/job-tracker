@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { jobService } from '@/services/jobService'
 import { useReferenceStore } from '@/stores/referenceStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -10,11 +10,13 @@ export const useJobStore = defineStore('job', () => {
   const loading = ref(false)
   const error = ref(null)
 
-  // Filters & Sorting state
+  // Filters, Sorting & Pagination state
   const searchQuery = ref('')
   const selectedStatus = ref('')
   const selectedPlatform = ref('')
   const sortBy = ref('latest')
+  const currentPage = ref(1)
+  const pageSize = ref(8)
 
   function normalizeApplication(app, existingApp = null) {
     if (!app) return app
@@ -72,12 +74,27 @@ export const useJobStore = defineStore('job', () => {
     return result
   })
 
+  // Client-Side Pagination Computed Getters
+  const totalPages = computed(() => {
+    if (!filteredApplications.value.length) return 1
+    return Math.ceil(filteredApplications.value.length / pageSize.value)
+  })
+
+  const paginatedApplications = computed(() => {
+    const start = (currentPage.value - 1) * pageSize.value
+    return filteredApplications.value.slice(start, start + pageSize.value)
+  })
+
+  // Watch filters and reset to page 1 automatically when filter/search changes
+  watch([searchQuery, selectedStatus, selectedPlatform, sortBy], () => {
+    currentPage.value = 1
+  })
+
   // Analytics KPI Getters (scoped to logged in user)
   const totalApplicationsCount = computed(() => userApplications.value.length)
 
   const responseRatePercent = computed(() => {
     if (!userApplications.value.length) return 0
-    // Responded means status is not initial 'Applied' (1) and not 'Wishlist' (5)
     const responded = userApplications.value.filter(a => {
       const sId = Number(a.current_status_id || a.status_id)
       return sId !== 1 && sId !== 5
@@ -297,18 +314,28 @@ export const useJobStore = defineStore('job', () => {
 
   function setSearchQuery(query) {
     searchQuery.value = query
+    currentPage.value = 1
   }
 
   function setFilterStatus(statusId) {
     selectedStatus.value = statusId
+    currentPage.value = 1
   }
 
   function setFilterPlatform(platformId) {
     selectedPlatform.value = platformId
+    currentPage.value = 1
   }
 
   function setSortBy(sortOrder) {
     sortBy.value = sortOrder
+    currentPage.value = 1
+  }
+
+  function setCurrentPage(page) {
+    if (page >= 1 && page <= totalPages.value) {
+      currentPage.value = page
+    }
   }
 
   function resetFilters() {
@@ -316,6 +343,7 @@ export const useJobStore = defineStore('job', () => {
     selectedStatus.value = ''
     selectedPlatform.value = ''
     sortBy.value = 'latest'
+    currentPage.value = 1
   }
 
   return {
@@ -327,8 +355,12 @@ export const useJobStore = defineStore('job', () => {
     selectedStatus,
     selectedPlatform,
     sortBy,
+    currentPage,
+    pageSize,
     userApplications,
     filteredApplications,
+    paginatedApplications,
+    totalPages,
     totalApplicationsCount,
     responseRatePercent,
     statusBreakdownData,
@@ -344,6 +376,7 @@ export const useJobStore = defineStore('job', () => {
     setFilterStatus,
     setFilterPlatform,
     setSortBy,
+    setCurrentPage,
     resetFilters,
   }
 })
