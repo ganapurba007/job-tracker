@@ -181,10 +181,20 @@ export const useJobStore = defineStore('job', () => {
       return normalized
     } catch (err) {
       error.value = err?.response?.data?.message || 'Gagal mengambil detail lamaran'
+      const foundInList = applications.value.find(a => String(a.id) === String(id))
+      if (foundInList) {
+        currentApplication.value = foundInList
+        return foundInList
+      }
+      currentApplication.value = null
       return null
     } finally {
       loading.value = false
     }
+  }
+
+  async function fetchApplicationById(id) {
+    return await fetchApplication(id)
   }
 
   async function addApplication(payload) {
@@ -325,6 +335,7 @@ export const useJobStore = defineStore('job', () => {
     platformBreakdownData,
     fetchApplications,
     fetchApplication,
+    fetchApplicationById,
     addApplication,
     updateApplication,
     deleteApplication,

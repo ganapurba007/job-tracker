@@ -55,7 +55,14 @@ const formatDate = computed(() => {
 async function loadDetail() {
   if (!applicationId.value) return
   try {
-    await jobStore.fetchApplicationById(applicationId.value)
+    const res = await jobStore.fetchApplication(applicationId.value)
+    if (!res && !jobStore.currentApplication) {
+      await jobStore.fetchApplications()
+      const found = jobStore.applications.find(a => String(a.id) === String(applicationId.value))
+      if (found) {
+        jobStore.currentApplication = found
+      }
+    }
   } catch (err) {
     toastStore.showToast('Gagal memuat detail lamaran', 'error')
   }
