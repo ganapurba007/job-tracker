@@ -127,7 +127,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="selectRef" class="relative w-full">
+  <div ref="selectRef" :class="['relative w-full', isOpen ? 'z-50' : 'z-10']">
     <!-- Main Select Input Control -->
     <button
       type="button"
@@ -197,7 +197,7 @@ onUnmounted(() => {
     >
       <div
         v-if="isOpen"
-        class="absolute z-50 left-0 right-0 mt-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden py-1.5 space-y-1"
+        class="absolute z-50 left-0 right-0 mt-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden py-1.5 space-y-1"
       >
         <!-- Select2 Real-Time Search Box -->
         <div v-if="searchable && options.length > 4" class="px-2 pt-1 pb-1.5 border-b border-slate-100 dark:border-slate-800">

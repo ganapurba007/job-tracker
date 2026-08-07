@@ -37,7 +37,7 @@ const sortOptions = [
 </script>
 
 <template>
-  <div class="bg-white dark:bg-slate-900 backdrop-blur-md rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-2xs space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-3 flex-wrap">
+  <div class="relative z-30 bg-white dark:bg-slate-900 backdrop-blur-md rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-2xs space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-3 flex-wrap">
     <!-- Search Input -->
     <div class="relative flex-1 min-w-[200px]">
       <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
