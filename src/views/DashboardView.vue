@@ -8,6 +8,7 @@ import StatusChart from '@/components/dashboard/StatusChart.vue'
 import PlatformChart from '@/components/dashboard/PlatformChart.vue'
 import JobCard from '@/components/applications/JobCard.vue'
 import JobFormModal from '@/components/applications/JobFormModal.vue'
+import ConfirmDeleteModal from '@/components/applications/ConfirmDeleteModal.vue'
 import Button from '@/components/common/Button.vue'
 import { Sparkles, Plus, ArrowRight, Briefcase } from '@lucide/vue'
 
@@ -16,6 +17,23 @@ const jobStore = useJobStore()
 const refStore = useReferenceStore()
 
 const showFormModal = ref(false)
+const showDeleteModal = ref(false)
+const targetApplication = ref(null)
+
+function openCreateModal() {
+  targetApplication.value = null
+  showFormModal.value = true
+}
+
+function openEditModal(app) {
+  targetApplication.value = app
+  showFormModal.value = true
+}
+
+function openDeleteModal(app) {
+  targetApplication.value = app
+  showDeleteModal.value = true
+}
 
 onMounted(async () => {
   await Promise.all([
@@ -42,7 +60,7 @@ onMounted(async () => {
         </p>
       </div>
 
-      <Button variant="orange" @click="showFormModal = true" class="shrink-0">
+      <Button variant="orange" @click="openCreateModal" class="shrink-0">
         <Plus class="w-4 h-4 mr-2" />
         Tambah Lamaran
       </Button>
@@ -73,7 +91,7 @@ onMounted(async () => {
             Catat lowongan baru yang Anda lamar hari ini.
           </p>
         </div>
-        <Button variant="accent" full-width @click="showFormModal = true">
+        <Button variant="accent" full-width @click="openCreateModal">
           <Plus class="w-4 h-4 mr-2" />
           Tambah Lamaran Baru
         </Button>
@@ -108,14 +126,24 @@ onMounted(async () => {
           v-for="app in jobStore.applications.slice(0, 3)"
           :key="app.id"
           :application="app"
+          @edit="openEditModal"
+          @delete="openDeleteModal"
         />
       </div>
     </div>
 
-    <!-- Job Form Modal -->
+    <!-- Job Form Modal (Create & Edit) -->
     <JobFormModal
       :show="showFormModal"
+      :application="targetApplication"
       @close="showFormModal = false"
+    />
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmDeleteModal
+      :show="showDeleteModal"
+      :application="targetApplication"
+      @close="showDeleteModal = false"
     />
   </div>
 </template>
