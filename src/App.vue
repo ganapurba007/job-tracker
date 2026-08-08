@@ -5,6 +5,7 @@ import { useThemeStore } from '@/stores/themeStore'
 import { useAuthStore } from '@/stores/authStore'
 import Navbar from '@/components/common/Navbar.vue'
 import Toast from '@/components/common/Toast.vue'
+import AuthLoadingOverlay from '@/components/common/AuthLoadingOverlay.vue'
 
 const themeStore = useThemeStore()
 const authStore = useAuthStore()
@@ -24,5 +25,6 @@ onMounted(() => {
     </main>
 
     <Toast />
+    <AuthLoadingOverlay />
   </div>
 </template>
